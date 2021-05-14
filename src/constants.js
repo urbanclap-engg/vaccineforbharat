@@ -34,7 +34,7 @@ export const API_URLS = {
 export const ALLOWED_NAME_EDITS = 3;
 
 export const SLOT_FILTER = {
-  MIN_AGE: 18,
+  MIN_AGE: 45,
   MIN_CAPACITY: 10
 };
 
