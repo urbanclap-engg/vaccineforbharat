@@ -168,9 +168,6 @@ function App(props) {
     }
   }, []);
   useEffect(() => {
-    console.log(state);
-  }, [state]);
-  useEffect(() => {
     switch(state.stage) {
       case PROCESS_STAGE.TRIGGER_CAPTCHA:
         setState({...state, errorObj: { code: undefined, message: undefined }});
