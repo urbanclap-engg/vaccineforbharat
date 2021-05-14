@@ -45,7 +45,7 @@ export const renderOtpStage = ({state, retryTime, classes, changeOtp, submitOtp,
         </Typography>
       </Grid>
       <Grid item lg={12}>
-        <TextField maxLength={6} id="otp" label="6-digit OTP" variant="outlined" value={state.otp} onChange={e => changeOtp(e.target.value)} />
+        <TextField maxLength={6} type="number" id="otp" label="6-digit OTP" variant="outlined" value={state.otp} onChange={e => changeOtp(e.target.value)} />
       </Grid>
       <Grid container justify="space-between">
         <Grid item lg={6}>
