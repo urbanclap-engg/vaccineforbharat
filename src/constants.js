@@ -54,6 +54,11 @@ export const COWIN_ERROR_CODE = {
   [ERROR_CODE.NO_BENEFICIARY]: 'APPOIN0001'
 };
 
-export const OTP_RETRY_TIME = 180;
+export const OTP_RETRY_TIME = 120;
 
 export const MAX_BOOKING_ATTEMPT = 2;
+
+export const ID_TYPE = {
+  'Aadhaar Card': 'aadhaar_card',
+  'PAN Card': 'pan_card'
+};

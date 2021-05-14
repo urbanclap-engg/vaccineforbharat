@@ -21,19 +21,19 @@ const shajs = require('sha.js');
 
 const useStyles = makeStyles({
   root: {
-    backgroundColor: '#B2EBFE'
+    backgroundColor: '#B2EBFE',
+    width: '100%'
   },
   image: {
-    overflow: 'hidden',
-    maxWidth: '100%'
+    overflowY: 'hidden',
+    width: '100%'
   },
   card: {
     flexGrow: 1,
-    width: '100%',
+    width: '90%',
     minHeight: '25%',
-    maxWidth: 320,
     margin: 'auto',
-    padding: 15,
+    padding: '5%',
     position: 'absolute',
     bottom: 0
   },
@@ -124,7 +124,7 @@ function App(props) {
         <Grid item lg={12}>
         <Typography color="error">
           <Box fontWeight="fontWeightBold">
-            {_.get(state.errorObj, 'message', '').substr(0, 40)}
+            {_.get(state.errorObj, 'message', '')}
           </Box>
           </Typography>
         </Grid>
@@ -146,7 +146,7 @@ function App(props) {
       case PROCESS_STAGE.BOOKING_FAILED:
         return renderBookingFailedStage(state, bookingAttempt, classes);
       case PROCESS_STAGE.ERROR:
-        return renderErrorStage(classes);
+        return renderErrorStage(state, classes);
       default:
         return renderOtpStage({state, retryTime, classes, changeOtp, submitOtp, triggerOtp});
     }
@@ -173,12 +173,14 @@ function App(props) {
   useEffect(() => {
     switch(state.stage) {
       case PROCESS_STAGE.TRIGGER_CAPTCHA:
+        setState({...state, errorObj: { code: undefined, message: undefined }});
         triggerCaptcha();
         break;
       case PROCESS_STAGE.FETCH_BENEFICIARY:
         fetchBenficiaries(state, stateCallback);
         break;
       case PROCESS_STAGE.FETCH_SLOTS:
+        setState({...state, errorObj: { code: undefined, message: undefined }});
         fetchSlots(state, stateCallback);
         break;
       case PROCESS_STAGE.SLOT_BOOKED:
@@ -190,7 +192,6 @@ function App(props) {
       default:
         break;
     }
-    setState({...state, errorObj: { code: undefined, message: undefined }});
   }, [state.stage]);
   useEffect(() => {
     const code = _.get(state.errorObj, 'code');
@@ -227,7 +228,7 @@ function App(props) {
   }, [retryTime])
   useEffect(() => {
     if (state.stage === PROCESS_STAGE.BOOKING_FAILED) {
-      setState({...state, vaccineSlot: {}, errorObj: {}, stage: PROCESS_STAGE.FETCH_SLOTS});
+      setState({...state, vaccineSlot: {}, errorObj: {}, captcha:'', stage: PROCESS_STAGE.FETCH_SLOTS});
     }
   }, [bookingAttempt])
 

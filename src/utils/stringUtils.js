@@ -25,7 +25,7 @@ export const getEditDistance = (firstString, secondString) => {
   });
 
   _.forEach(_.range(1, lengthFirstString+1), (indexFirst) => {
-    _.forEach(_.range(1, lengthFirstString+1), (indexSecond) => {
+    _.forEach(_.range(1, lengthSecondString+1), (indexSecond) => {
      if (firstString[indexFirst - 1] === secondString[indexSecond - 1]){
         costs[indexFirst][indexSecond] = costs[indexFirst-1][indexSecond-1];
       } else {

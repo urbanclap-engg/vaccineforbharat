@@ -1,16 +1,29 @@
 import * as _ from 'lodash';
 import { makeGetCall, makePostCall } from '../utils/network';
 import { getEditDistance, getFirstName, getCurrentDateString } from '../utils/stringUtils';
-import { PROCESS_STAGE, API_URLS, ALLOWED_NAME_EDITS, ERROR_CODE } from '../constants';
+import { PROCESS_STAGE, API_URLS, ALLOWED_NAME_EDITS, ERROR_CODE, ID_TYPE } from '../constants';
 
 const filterBeneficiary = (state, beneficiaryList) => {
   const paramsName = getFirstName(state.name);
+  const { id_type: idType, id_number: idNumber='' } = state;
+  const maskedIdNumber = idNumber.slice(-4);
+
+  const idMatchRecord = _.find(beneficiaryList, (entry) => {
+    const entryIdType = ID_TYPE[entry.photo_id_type];
+    const entryIdNumber = _.get(entry, 'photo_id_number', '').slice(-4);
+
+    return idType === entryIdType && maskedIdNumber === entryIdNumber;
+  });
+  if (!_.isEmpty(idMatchRecord)) {
+    return idMatchRecord;
+  }
+
   return _.find(beneficiaryList, (entry) => {
     const { name } = entry;
     const firstName = getFirstName(name);
     const editDistance = getEditDistance(paramsName, firstName);
     return editDistance < ALLOWED_NAME_EDITS;
-  })
+  });
 };
 
 export const fetchBenficiaries = async (state, stateCallback) => {

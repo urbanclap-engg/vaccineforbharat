@@ -1,5 +1,6 @@
 import React from 'react';
-import { OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT } from '../constants';
+import * as _ from 'lodash';
+import { OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT, ERROR_CODE, COWIN_ERROR_CODE } from '../constants';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -31,7 +32,9 @@ export const renderOtpStage = ({state, retryTime, classes, changeOtp, submitOtp,
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
         <Typography variant="body2">
-          LOGIN
+          <Box fontWeight="fontWeightBold">
+            LOGIN
+          </Box>
         </Typography>
       </Grid>
       <Grid item lg={12}>
@@ -56,7 +59,7 @@ export const renderOtpStage = ({state, retryTime, classes, changeOtp, submitOtp,
           color={retryEnabled?"primary":"default"}
           onClick={triggerOtp}
           disabled={!retryEnabled || state.isLoading}>
-          {`Retry (${retryTimeString})`}
+          {`Retry ${retryEnabled?'':'('+retryTimeString+')'}`}
         </Button>
         </Grid>
       </Grid>
@@ -74,7 +77,9 @@ export const renderCaptchStage = (state, classes, changeCaptcha, submitCaptcha) 
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
         <Typography variant="body2">
-          Book Slot
+          <Box fontWeight="fontWeightBold">
+            Book Slot
+          </Box>
         </Typography>
       </Grid>
       <Grid item lg={12}>
@@ -104,8 +109,10 @@ export const renderSuccessStage = (classes) => {
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
-        <Typography variant="body2" color="primary">
-          SLOT BOOKED
+        <Typography variant="body2">
+          <Box fontWeight="fontWeightBold" color="success.main">
+            SLOT BOOKED
+          </Box>
         </Typography>
       </Grid>
       <Grid item lg={12}>
@@ -126,8 +133,10 @@ export const renderVaccinatedStage = (classes) => {
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
-        <Typography variant="body2" color="primary">
-          VACCINATED
+        <Typography variant="body2">
+          <Box fontWeight="fontWeightBold" color="success.main">
+            VACCINATED
+          </Box>
         </Typography>
       </Grid>
       <Grid item lg={12}>
@@ -148,8 +157,10 @@ export const renderExistingBookingStage = (classes) => {
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
-        <Typography variant="body2" color="primary">
-          SLOT BOOKED
+        <Typography variant="body2">
+          <Box fontWeight="fontWeightBold" color="success.main">
+            SLOT BOOKED
+          </Box>
         </Typography>
       </Grid>
       <Grid item lg={12}>
@@ -179,8 +190,10 @@ export const renderBookingFailedStage = (state, bookingAttempt, classes) => {
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
-        <Typography variant="body2" color="primary">
-          BOOKING FAILED
+        <Typography variant="body2">
+          <Box fontWeight="fontWeightBold" color="secondary.main">
+            BOOKING FAILED
+          </Box>
         </Typography>
       </Grid>
       <Grid item lg={12}>
@@ -197,13 +210,29 @@ export const renderBookingFailedStage = (state, bookingAttempt, classes) => {
   )
 };
 
-export const renderErrorStage = (classes) => {
+const getErrorMessage = (state) => {
+  const errCode = _.get(state.errorObj, 'code');
+  if (errCode === ERROR_CODE.NO_BENEFICIARY || errCode === COWIN_ERROR_CODE.NO_BENEFICIARY) {
+    return (<Typography variant="h6">
+    <Box fontWeight="fontWeightBold">
+      Your registration on CoWin Portal is pending.
+      Please register first so that you can book slots.
+    </Box>
+    </Typography>);
+  }
+  return (<Typography variant="body2">
+    <Box fontWeight="fontWeightBold" color="secondary.main">
+      SOMETHING WENT WRONG
+    </Box>
+  </Typography>);
+};
+
+export const renderErrorStage = (state, classes) => {
+  const errorMessage = getErrorMessage(state);
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
-        <Typography variant="body2" color="error">
-          SOMETHING WENT WRONG
-        </Typography>
+        {errorMessage}
       </Grid>
       <Grid item lg={12}>
         {getRedirectElement(classes)}

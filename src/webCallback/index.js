@@ -64,5 +64,5 @@ const getErrorParams = (state) => {
   if (state.stage === PROCESS_STAGE.SLOT_BOOKED) {
     return {};
   }
-  return state.errorObj;
+  return state.errorObj || {};
 };
