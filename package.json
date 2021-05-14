@@ -1,6 +1,6 @@
 {
-  "name": "web-app",
-  "homepage": "",
+  "name": "vaccineforbharat",
+  "homepage": "http://buildforbharat1.github.io/vaccineforbharat",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -18,7 +18,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -b master -d build"
   },
   "eslintConfig": {
     "extends": [
