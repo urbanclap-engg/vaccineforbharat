@@ -86,7 +86,7 @@ function App(props) {
         "otp": otpHash,
         "txnId": state.txnId
       }, stateCallback);
-      setState({...state, token: data.token, stage: PROCESS_STAGE.FETCH_BENEFICIARY });
+      setState({...state, token: data.token, errorObj: {}, stage: PROCESS_STAGE.FETCH_BENEFICIARY });
     } catch(err) {
     }
   };
@@ -101,7 +101,7 @@ function App(props) {
         "dose": _.isEmpty(state.beneficiaryDetails.dose1_date)?1:2
       }, stateCallback, state.token);
       const appointmentId = _.get(data, 'appointment_confirmation_no');
-      setState({...state, stage: PROCESS_STAGE.SLOT_BOOKED, appointmentId })
+      setState({...state, errorObj:{}, stage: PROCESS_STAGE.SLOT_BOOKED, appointmentId })
     } catch(err) {
     }
   };
@@ -124,7 +124,7 @@ function App(props) {
         <Grid item lg={12}>
         <Typography color="error">
           <Box fontWeight="fontWeightBold">
-            {_.get(state.errorObj, 'message', '')}
+            {state.errorObj.message}
           </Box>
           </Typography>
         </Grid>
@@ -152,14 +152,15 @@ function App(props) {
     }
   }
   const handleBookingFailure = () => {
-    setState({...state, stage: PROCESS_STAGE.BOOKING_FAILED});
+    setState({...state, errorObj: {}, stage: PROCESS_STAGE.BOOKING_FAILED});
     if (bookingAttempt < MAX_BOOKING_ATTEMPT) {
       const intervalId = setTimeout(() => {
+        console.log('Updating now');
         setBookingAttempt(bookingAttempt+1);
       }, 3000);
       return () => clearInterval(intervalId);
     } else {
-      triggerCallback(state);
+      triggerCallback({...state, stage: PROCESS_STAGE.BOOKING_FAILED});
     }
   };
   useEffect(() => {
@@ -170,14 +171,12 @@ function App(props) {
   useEffect(() => {
     switch(state.stage) {
       case PROCESS_STAGE.TRIGGER_CAPTCHA:
-        setState({...state, errorObj: { code: undefined, message: undefined }});
         triggerCaptcha();
         break;
       case PROCESS_STAGE.FETCH_BENEFICIARY:
         fetchBenficiaries(state, stateCallback);
         break;
       case PROCESS_STAGE.FETCH_SLOTS:
-        setState({...state, errorObj: { code: undefined, message: undefined }});
         fetchSlots(state, stateCallback);
         break;
       case PROCESS_STAGE.SLOT_BOOKED:
@@ -205,7 +204,7 @@ function App(props) {
         setState({...state, stage: PROCESS_STAGE.EXISTING_BOOKING });
         return;
       case ERROR_CODE.NO_SLOT:
-        setState({...state, stage: PROCESS_STAGE.BOOKING_FAILED });
+        handleBookingFailure();
         return;
       default:
         if (state.stage === PROCESS_STAGE.SCHEDULE) {
