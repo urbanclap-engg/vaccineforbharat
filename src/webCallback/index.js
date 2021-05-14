@@ -25,7 +25,7 @@ const getCallbackParams = (state) => {
     vaccine: beneficiaryDetails.vaccine,
     vaccination_status: beneficiaryDetails.vaccination_status,
     dose_1_date: beneficiaryDetails.dose1_date,
-    dose_2_date: beneficiaryDetails.dose_2_date,
+    dose_2_date: beneficiaryDetails.dose2_date,
     err_code: errorObj.code,
     err_message: errorObj.message
   };

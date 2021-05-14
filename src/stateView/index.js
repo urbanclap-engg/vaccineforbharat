@@ -1,5 +1,5 @@
 import React from 'react';
-import { OTP_RETRY_TIME } from '../constants';
+import { OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT } from '../constants';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -12,6 +12,14 @@ const getRedirectElement = (classes) => {
   return (<div className={classes.body}>
     <Typography>
     ⌛ Taking you back...
+    </Typography>
+  </div>)
+};
+
+const getRetryElement = (classes) => {
+  return (<div className={classes.body}>
+    <Typography>
+    ⌛ Retrying some other slot...
     </Typography>
   </div>)
 };
@@ -158,7 +166,16 @@ export const renderExistingBookingStage = (classes) => {
   )
 };
 
-export const renderBookingFailedStage = (classes) => {
+const getBookingActionElement = (bookingAttempt, classes) => {
+  if (bookingAttempt < MAX_BOOKING_ATTEMPT) {
+    return getRetryElement(classes);
+  }
+  return getRedirectElement(classes);
+}
+
+export const renderBookingFailedStage = (state, bookingAttempt, classes) => {
+  const bookingActionElement = getBookingActionElement(bookingAttempt, classes);
+
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
@@ -174,7 +191,7 @@ export const renderBookingFailedStage = (classes) => {
         </Typography>
       </Grid>
       <Grid item lg={12}>
-        {getRedirectElement(classes)}
+        {bookingActionElement}
       </Grid>
     </Grid>
   )

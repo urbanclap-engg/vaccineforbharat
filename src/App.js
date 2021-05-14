@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter } from "react-router";
 import * as _ from 'lodash';
-import { SECRET_KEYS, PROCESS_STAGE, API_URLS, ERROR_CODE, COWIN_ERROR_CODE, OTP_RETRY_TIME } from './constants';
+import { SECRET_KEYS, PROCESS_STAGE, API_URLS, ERROR_CODE, COWIN_ERROR_CODE,
+  OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT } from './constants';
 import Card from '@material-ui/core/Card';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -54,6 +55,8 @@ function App(props) {
   const [state, setState] = useState({...searchParams,
     stage: PROCESS_STAGE.INIT, otp: '', captcha: '' });
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
+  const [bookingAttempt, setBookingAttempt] = useState(1);
+
   const stateCallback = (updatedState) => {
     setState({...state, ...updatedState});
   };
@@ -130,6 +133,8 @@ function App(props) {
   };
   const getRenderView = (classes) => {
       switch(state.stage) {
+      case PROCESS_STAGE.FETCH_SLOTS:
+        return renderCaptchStage(state, classes, changeCaptcha, submitCaptcha);
       case PROCESS_STAGE.SCHEDULE:
         return renderCaptchStage(state, classes, changeCaptcha, submitCaptcha);
       case PROCESS_STAGE.SLOT_BOOKED:
@@ -139,13 +144,24 @@ function App(props) {
       case PROCESS_STAGE.EXISTING_BOOKING:
         return renderExistingBookingStage(classes);    
       case PROCESS_STAGE.BOOKING_FAILED:
-        return renderBookingFailedStage(classes);      
+        return renderBookingFailedStage(state, bookingAttempt, classes);
       case PROCESS_STAGE.ERROR:
         return renderErrorStage(classes);
       default:
         return renderOtpStage({state, retryTime, classes, changeOtp, submitOtp, triggerOtp});
     }
   }
+  const handleBookingFailure = () => {
+    setState({...state, stage: PROCESS_STAGE.BOOKING_FAILED});
+    if (bookingAttempt < MAX_BOOKING_ATTEMPT) {
+      const intervalId = setTimeout(() => {
+        setBookingAttempt(bookingAttempt+1);
+      }, 3000);
+      return () => clearInterval(intervalId);
+    } else {
+      triggerCallback(state);
+    }
+  };
   useEffect(() => {
     if (state.phone && state.stage === PROCESS_STAGE.INIT) {
       triggerOtp();
@@ -168,7 +184,6 @@ function App(props) {
       case PROCESS_STAGE.SLOT_BOOKED:
       case PROCESS_STAGE.VACCINATED:
       case PROCESS_STAGE.EXISTING_BOOKING:
-      case PROCESS_STAGE.BOOKING_FAILED:
       case PROCESS_STAGE.ERROR:
         triggerCallback(state);
         break;
@@ -194,12 +209,9 @@ function App(props) {
       case ERROR_CODE.NO_SLOT:
         setState({...state, stage: PROCESS_STAGE.BOOKING_FAILED });
         return;
-      case ERROR_CODE.NO_BENEFICIARY:
-        setState({...state, stage: PROCESS_STAGE.ERROR });
-        return;  
       default:
         if (state.stage === PROCESS_STAGE.SCHEDULE) {
-          setState({...state, stage: PROCESS_STAGE.BOOKING_FAILED});
+          handleBookingFailure();
         } else {
           setState({...state, stage: PROCESS_STAGE.ERROR });
         }
@@ -213,6 +225,11 @@ function App(props) {
     }, 1000);
     return () => clearInterval(intervalId);
   }, [retryTime])
+  useEffect(() => {
+    if (state.stage === PROCESS_STAGE.BOOKING_FAILED) {
+      setState({...state, vaccineSlot: {}, errorObj: {}, stage: PROCESS_STAGE.FETCH_SLOTS});
+    }
+  }, [bookingAttempt])
 
   const classes = useStyles();
   const renderView = getRenderView(classes);
