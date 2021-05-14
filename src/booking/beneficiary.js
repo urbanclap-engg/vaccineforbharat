@@ -22,13 +22,13 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       stateCallback({errorObj: { code: ERROR_CODE.NO_BENEFICIARY, message: 'No beneficiary with name match' } });
       return;
     }
-    if (!_.isEmpty(beneficiaryDetails.appointments)) {
-      stateCallback({stage: PROCESS_STAGE.EXISTING_BOOKING, beneficiaryDetails });
-      return;
-    }
     // TODO: Need to be changed later for dose 2 
     if (!_.isEmpty(beneficiaryDetails.dose1_date)) {
       stateCallback({stage: PROCESS_STAGE.VACCINATED, beneficiaryDetails });
+      return;
+    }
+    if (!_.isEmpty(beneficiaryDetails.appointments)) {
+      stateCallback({stage: PROCESS_STAGE.EXISTING_BOOKING, beneficiaryDetails });
       return;
     }
     stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails });
