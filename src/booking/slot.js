@@ -8,7 +8,10 @@ const getAvailableVaccineSlot = (centerList) => {
   _.forEach(centerList, (center) => {
     const { sessions } = center;
     const availableSession = _.find(sessions, (session) => {
-      return session.available_capacity >= SLOT_FILTER.MIN_CAPACITY &&
+      // TODO: Update to param based dose check later
+      const centerAvailability = _.get(session, 'available_capacity', 0);
+      const dose1Availability = _.get(session, 'available_capacity_dose1', 0);
+      return centerAvailability > 0 && dose1Availability >= SLOT_FILTER.MIN_CAPACITY &&
         session.min_age_limit === SLOT_FILTER.MIN_AGE;
     });
     if (availableSession) {
