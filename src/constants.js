@@ -35,7 +35,7 @@ export const ALLOWED_NAME_EDITS = 3;
 
 export const SLOT_FILTER = {
   MIN_AGE: 18,
-  MIN_CAPACITY: 10
+  MIN_CAPACITY: 5
 };
 
 export const ERROR_CODE = {
