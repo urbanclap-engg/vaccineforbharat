@@ -54,7 +54,7 @@ const getCallbackParams = (state) => {
         center_address: vaccineSlot.address,
         center_district_name: vaccineSlot.district_name,
         center_pincode: vaccineSlot.pincode,
-        slot: vaccineSlot.slots[0],
+        slot: vaccineSlot.slot_time,
         session_id: vaccineSlot.session_id,
         date: vaccineSlot.date
       };

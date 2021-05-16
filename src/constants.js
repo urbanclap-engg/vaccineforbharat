@@ -62,3 +62,5 @@ export const ID_TYPE = {
   'Aadhaar Card': 'aadhaar_card',
   'PAN Card': 'pan_card'
 };
+
+export const SLOT_CUTOFF_HOUR = 15;

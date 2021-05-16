@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { SLOT_CUTOFF_HOUR } from '../constants';
 const MAX_STRING_CHECK = 50;
 
 export const getFirstName = (name) => {
@@ -45,7 +46,19 @@ export const getCurrentDateString = () => {
   const mm = today.getMonth() + 1;
   const yyyy = today.getFullYear();
 
-  return `${dd}-${mm}-${yyyy}`;
+  return `${dd}-${(mm>9 ? '' : '0') + mm}-${yyyy}`;
+};
+
+export const getSlotDateString = () => {
+  const today = new Date();
+  let dd = today.getDate();
+  const mm = today.getMonth() + 1;
+  const yyyy = today.getFullYear();
+  const currentHour = today.getHours();
+  if (currentHour > SLOT_CUTOFF_HOUR) {
+    dd += 1;
+  }
+  return `${dd}-${(mm>9 ? '' : '0') + mm}-${yyyy}`;
 };
 
 export const getMinuteString = (seconds) => {

@@ -96,7 +96,7 @@ function App(props) {
         "captcha": state.captcha,
         "beneficiaries": [state.beneficiaryDetails.beneficiary_reference_id],
         "center_id": state.vaccineSlot.center_id,
-        "slot": state.vaccineSlot.slots[0],
+        "slot": state.vaccineSlot.slot_time,
         "session_id": state.vaccineSlot.session_id,
         "dose": _.isEmpty(state.beneficiaryDetails.dose1_date)?1:2
       }, stateCallback, state.token);

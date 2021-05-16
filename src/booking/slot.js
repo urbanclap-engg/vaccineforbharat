@@ -1,7 +1,17 @@
 import * as _ from 'lodash';
 import { makeGetCall, makePostCall } from '../utils/network';
-import { getCurrentDateString } from '../utils/stringUtils';
+import { getCurrentDateString, getSlotDateString } from '../utils/stringUtils';
 import { PROCESS_STAGE, API_URLS, SLOT_FILTER, ERROR_CODE } from '../constants';
+
+const getTargetSlotTime = (availableSession) => {
+  const slotDate = availableSession.date;
+  const currentDateString = getCurrentDateString();
+
+  if (currentDateString !== slotDate) {
+    return availableSession.slots[0];
+  }
+  return _.last(availableSession.slots);
+};
 
 const getAvailableVaccineSlot = (centerList) => {
   let availableSlot = undefined;
@@ -15,9 +25,11 @@ const getAvailableVaccineSlot = (centerList) => {
         session.min_age_limit === SLOT_FILTER.MIN_AGE;
     });
     if (availableSession) {
+      const targetSlot = getTargetSlotTime(availableSession);
       availableSlot = {
         ...center,
-        ...availableSession
+        ...availableSession,
+        slot_time: targetSlot
       };
       return false;
     }
@@ -31,7 +43,7 @@ export const fetchSlots = async(state, stateCallback) => {
     stateCallback({ errorObj: { code: ERROR_CODE.UNKNOWN_ERROR, message: 'No district passed' } });
     return;
   }
-  const dateString = getCurrentDateString();
+  const dateString = getSlotDateString();
   try {
     const data = await makeGetCall(`${API_URLS.FETCH_SLOTS}?district_id=${district}&date=${dateString}`,
      stateCallback, state.token);
