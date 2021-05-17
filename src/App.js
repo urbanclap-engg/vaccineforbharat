@@ -16,7 +16,7 @@ import { triggerCallback } from './webCallback';
 import Image from './assests/build4bharat.jpg';
 import Box from '@material-ui/core/Box';
 import { renderOtpStage, renderCaptchStage, renderSuccessStage, renderExistingBookingStage,
-renderBookingFailedStage, renderVaccinatedStage, renderErrorStage } from './stateView';
+renderBookingFailedStage, renderVaccinatedStage, renderErrorStage, renderRegisteredStage } from './stateView';
 const shajs = require('sha.js');
 
 const useStyles = makeStyles({
@@ -147,6 +147,8 @@ function App(props) {
         return renderBookingFailedStage(state, bookingAttempt, classes);
       case PROCESS_STAGE.ERROR:
         return renderErrorStage(state, classes);
+      case PROCESS_STAGE.REGISTERED:
+        return renderRegisteredStage(classes);
       default:
         return renderOtpStage({state, retryTime, classes, changeOtp, submitOtp, triggerOtp});
     }
@@ -182,6 +184,7 @@ function App(props) {
       case PROCESS_STAGE.SLOT_BOOKED:
       case PROCESS_STAGE.VACCINATED:
       case PROCESS_STAGE.EXISTING_BOOKING:
+      case PROCESS_STAGE.REGISTERED:
       case PROCESS_STAGE.ERROR:
         triggerCallback(state);
         break;

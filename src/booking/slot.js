@@ -40,7 +40,7 @@ const getAvailableVaccineSlot = (centerList) => {
 export const fetchSlots = async(state, stateCallback) => {
   const { district } = state;
   if (!district) {
-    stateCallback({ errorObj: { code: ERROR_CODE.UNKNOWN_ERROR, message: 'No district passed' } });
+    stateCallback({ stage: PROCESS_STAGE.REGISTERED });
     return;
   }
   const dateString = getSlotDateString();

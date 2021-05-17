@@ -142,7 +142,7 @@ export const renderVaccinatedStage = (classes) => {
       <Grid item lg={12}>
         <Typography variant="h6">
         <Box fontWeight="fontWeightBold">
-          You have already been vaccinated
+          You have been vaccinated
         </Box>
         </Typography>
       </Grid>
@@ -166,7 +166,7 @@ export const renderExistingBookingStage = (classes) => {
       <Grid item lg={12}>
         <Typography variant="h6">
         <Box fontWeight="fontWeightBold">
-          You already have a slot booking
+          You have a slot booking
         </Box>
         </Typography>
       </Grid>
@@ -233,6 +233,30 @@ export const renderErrorStage = (state, classes) => {
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
         {errorMessage}
+      </Grid>
+      <Grid item lg={12}>
+        {getRedirectElement(classes)}
+      </Grid>
+    </Grid>
+  )
+};
+
+export const renderRegisteredStage = (classes) => {
+  return (
+    <Grid alignItems="center" justify="center">
+      <Grid item lg={12}>
+        <Typography variant="body2">
+          <Box fontWeight="fontWeightBold" color="success.main">
+            STATUS CONFIRMED
+          </Box>
+        </Typography>
+      </Grid>
+      <Grid item lg={12}>
+        <Typography variant="h6">
+        <Box fontWeight="fontWeightBold">
+          You have registered on CoWin portal. Please book a slot for vaccination soon.
+        </Box>
+        </Typography>
       </Grid>
       <Grid item lg={12}>
         {getRedirectElement(classes)}
