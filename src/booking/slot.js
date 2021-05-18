@@ -13,7 +13,8 @@ const getTargetSlotTime = (availableSession) => {
   return _.last(availableSession.slots);
 };
 
-const getAvailableVaccineSlot = (centerList) => {
+const getAvailableVaccineSlot = (state, centerList) => {
+  const lastAttemptedSession = _.get(state, 'vaccineSlot.session_id');
   const availableSlots = [];
   _.forEach(centerList, (center) => {
     const { sessions } = center;
@@ -22,7 +23,7 @@ const getAvailableVaccineSlot = (centerList) => {
       const centerAvailability = _.get(session, 'available_capacity', 0);
       const dose1Availability = _.get(session, 'available_capacity_dose1', 0);
       return centerAvailability > 0 && dose1Availability >= SLOT_FILTER.MIN_CAPACITY &&
-        session.min_age_limit === SLOT_FILTER.MIN_AGE;
+        session.min_age_limit === SLOT_FILTER.MIN_AGE && session.session_id !== lastAttemptedSession;
     });
     const maxAvailabilitySession = _.maxBy(availableSessions, 'available_capacity_dose1');
 
@@ -51,7 +52,7 @@ export const fetchSlots = async(state, stateCallback) => {
     const data = await makeGetCall(`${API_URLS.FETCH_SLOTS}?district_id=${district}&date=${dateString}`,
      stateCallback, state.token);
     const centerList = _.get(data, 'centers', []);
-    const vaccineSlot = getAvailableVaccineSlot(centerList);
+    const vaccineSlot = getAvailableVaccineSlot(state, centerList);
     if (_.isEmpty(vaccineSlot)) {
       stateCallback({errorObj: { code: ERROR_CODE.NO_SLOT, message: `No available slot found for district ${district}`} })
       return;

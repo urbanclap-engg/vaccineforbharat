@@ -227,7 +227,7 @@ function App(props) {
   }, [retryTime])
   useEffect(() => {
     if (state.stage === PROCESS_STAGE.BOOKING_FAILED) {
-      setState({...state, vaccineSlot: {}, errorObj: {}, captcha:'', stage: PROCESS_STAGE.FETCH_SLOTS});
+      setState({...state, errorObj: {}, captcha:'', stage: PROCESS_STAGE.FETCH_SLOTS});
     }
   }, [bookingAttempt])
 
