@@ -56,7 +56,9 @@ const getCallbackParams = (state) => {
         center_pincode: vaccineSlot.pincode,
         slot: vaccineSlot.slot_time,
         session_id: vaccineSlot.session_id,
-        date: vaccineSlot.date
+        date: vaccineSlot.date,
+        // TODO dose 2 handling
+        dose: 1
       };
     default:
       return baseState;
