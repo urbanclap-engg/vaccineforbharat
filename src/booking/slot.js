@@ -14,27 +14,30 @@ const getTargetSlotTime = (availableSession) => {
 };
 
 const getAvailableVaccineSlot = (centerList) => {
-  let availableSlot = undefined;
+  const availableSlots = [];
   _.forEach(centerList, (center) => {
     const { sessions } = center;
-    const availableSession = _.find(sessions, (session) => {
+    const availableSessions = _.filter(sessions, (session) => {
       // TODO: Update to param based dose check later
       const centerAvailability = _.get(session, 'available_capacity', 0);
       const dose1Availability = _.get(session, 'available_capacity_dose1', 0);
       return centerAvailability > 0 && dose1Availability >= SLOT_FILTER.MIN_CAPACITY &&
         session.min_age_limit === SLOT_FILTER.MIN_AGE;
     });
-    if (availableSession) {
-      const targetSlot = getTargetSlotTime(availableSession);
-      availableSlot = {
+    const maxAvailabilitySession = _.maxBy(availableSessions, 'available_capacity_dose1');
+
+    if (maxAvailabilitySession) {
+      const targetSlot = getTargetSlotTime(maxAvailabilitySession);
+      availableSlots.push({
         ...center,
-        ...availableSession,
+        ...maxAvailabilitySession,
         slot_time: targetSlot
-      };
-      return false;
+      });
     }
   });
-  return availableSlot;
+  const selectedSlot = _.maxBy(availableSlots, 'available_capacity_dose1');
+
+  return selectedSlot;
 };
 
 export const fetchSlots = async(state, stateCallback) => {
