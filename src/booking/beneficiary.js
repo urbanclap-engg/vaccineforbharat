@@ -36,7 +36,7 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       return;
     }
     // TODO: Need to be changed later for dose 2 
-    if (!_.isEmpty(beneficiaryDetails.dose1_date)) {
+    if (!_.isEmpty(beneficiaryDetails.dose1_date) || !_.isEmpty(beneficiaryDetails.dose2_date)) {
       stateCallback({stage: PROCESS_STAGE.VACCINATED, beneficiaryDetails });
       return;
     }
