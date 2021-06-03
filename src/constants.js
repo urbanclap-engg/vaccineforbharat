@@ -20,7 +20,10 @@ export const PROCESS_STAGE = {
   EXISTING_BOOKING: 'EXISTING_BOOKING',
   BOOKING_FAILED: 'BOOKING_FAILED',
   VACCINATED: 'VACCINATED',
-  REGISTERED: 'REGISTERED'
+  REGISTERED: 'REGISTERED',
+  NOT_REGISTERED: 'NOT_REGISTERED',
+  ALTERNATE_PHONE_INIT: 'ALTERNATE_PHONE_INIT',
+  GO_HOME: 'GO_HOME'
 };
 
 export const API_URLS = {
@@ -65,3 +68,13 @@ export const ID_TYPE = {
 };
 
 export const SLOT_CUTOFF_HOUR = 15;
+
+export const INVALID_PHONE_REASONS_TEXT = {
+  SAME_AS_LAST: 'New phone number can\'t be same as last',
+  DEFAULT: 'Please enter a valid phone number'
+};
+
+export const DEFAULT_AUTO_CALLBACK_STATE = {
+  callBackDelayInSeconds: 5,
+  isTimerOn: false
+};

@@ -1,10 +1,11 @@
 import React from 'react';
 import * as _ from 'lodash';
-import { OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT, ERROR_CODE, COWIN_ERROR_CODE } from '../constants';
+import { OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT, ERROR_CODE, COWIN_ERROR_CODE, PROCESS_STAGE } from '../constants';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import Link from '@material-ui/core/Link';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMinuteString } from '../utils/stringUtils';
 import Box from '@material-ui/core/Box';
@@ -25,7 +26,8 @@ const getRetryElement = (classes) => {
   </div>)
 };
 
-export const renderOtpStage = ({state, retryTime, classes, changeOtp, submitOtp, triggerOtp}) => {
+export const renderOtpStage = (params) => {
+  const { state, retryTime, classes, changeOtp, submitOtp, triggerOtp, enterAlternatePhoneInitStage, getActivePhone } = params;
   const retryEnabled = (retryTime < 1);
   const retryTimeString = getMinuteString(retryTime);
   return (
@@ -42,6 +44,16 @@ export const renderOtpStage = ({state, retryTime, classes, changeOtp, submitOtp,
         <Box fontWeight="fontWeightBold">
           Enter OTP
         </Box>
+        </Typography>
+        <Typography variant='subtitle2'>
+          <Box my={2}>
+            <Box>
+              OTP sent to {getActivePhone()}
+            </Box>
+            <Link onClick={enterAlternatePhoneInitStage}>
+              Vaccine registered on different number?
+            </Link>
+          </Box>
         </Typography>
       </Grid>
       <Grid item lg={12}>
@@ -260,6 +272,96 @@ export const renderRegisteredStage = (classes) => {
       </Grid>
       <Grid item lg={12}>
         {getRedirectElement(classes)}
+      </Grid>
+    </Grid>
+  )
+};
+
+export const renderNotRegiseteredState = (params) => {
+  const { classes, getActivePhone, enterAlternatePhoneInitStage, goToHomeClick } = params;
+  return (
+    <Grid alignItems="center" justify="center">
+      <Grid item lg={12}>
+        <Typography variant="subtitle2">
+          <Box color="#FF0000" fontWeight="fontWeightBold">
+            Vaccination pending
+          </Box>
+        </Typography>
+      </Grid>
+      <Grid item lg={12}>
+        <Typography variant="h6">
+            <Box fontWeight="fontWeightBold" my={2}>
+              No vaccination registration found for {getActivePhone()}
+            </Box>
+        </Typography>
+      </Grid>
+      <Grid container justify="center" alignItems="center" direction="column">
+        <Button className={classes.button}
+          variant="contained"
+          color="primary"
+          //size="large"
+          fullWidth={true}
+          onClick={enterAlternatePhoneInitStage}>
+            <Typography variant="subtitle2">
+              Vaccine registered on different number?
+            </Typography>
+        </Button>
+        <Button className={classes.button}
+          variant="contained"
+          color="primary"
+          //size="small"
+          fullWidth={true}
+          onClick={goToHomeClick}>
+            <Typography variant="subtitle2">
+              Go to home
+            </Typography>
+        </Button>
+      </Grid>
+    </Grid>
+  )
+};
+
+export const renderAlternatePhoneInitState = (classes, state, submitAlternatePhone, changeAlternatePhone) => {
+  return (
+    <Grid alignItems="center" justify="center" direction="column">
+      <Grid item lg={12}>
+        <Typography variant="h6">
+            <Box fontWeight="fontWeightBold" my={2}>
+              Enter phone number
+            </Box>
+        </Typography>
+      </Grid>
+      <Grid item lg={12}>
+        <TextField
+          maxLength={10}
+          fullWidth={true}
+          size="small"
+          type="number"
+          id="alternatePhone"
+          label="Phone number"
+          variant="outlined"
+          value={state.alternatePhone}
+          onChange={e => changeAlternatePhone(e.target.value)}
+        />
+      </Grid>
+      { !state.isPhoneValid && 
+        <Typography variant="subtitle2">
+          <Box color="#ff0000">
+            {state.invalidPhoneReason}
+          </Box>
+        </Typography>
+      }
+      <Grid item lg={12}>
+        <Button className={classes.button}
+          variant="contained"
+          color="primary"
+          fullWidth={true}
+          id="submitAlternatePhone"
+          onClick={submitAlternatePhone}>
+          <Typography variant="subtitle1">
+              Send OTP
+          </Typography>
+        </Button>
       </Grid>
     </Grid>
   )

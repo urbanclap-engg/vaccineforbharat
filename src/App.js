@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { withRouter } from "react-router";
 import * as _ from 'lodash';
 import { SECRET_KEYS, PROCESS_STAGE, API_URLS, ERROR_CODE, COWIN_ERROR_CODE,
-  OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT } from './constants';
+  OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT, INVALID_PHONE_REASONS_TEXT, DEFAULT_AUTO_CALLBACK_STATE } from './constants';
 import Card from '@material-ui/core/Card';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -16,7 +16,7 @@ import { triggerCallback } from './webCallback';
 import Image from './assests/build4bharat.jpg';
 import Box from '@material-ui/core/Box';
 import { renderOtpStage, renderCaptchStage, renderSuccessStage, renderExistingBookingStage,
-renderBookingFailedStage, renderVaccinatedStage, renderErrorStage, renderRegisteredStage } from './stateView';
+renderBookingFailedStage, renderVaccinatedStage, renderErrorStage, renderRegisteredStage, renderNotRegiseteredState, renderAlternatePhoneInitState } from './stateView';
 const shajs = require('sha.js');
 
 const useStyles = makeStyles({
@@ -53,10 +53,15 @@ function getRandomSecretKey() {
 function App(props) {
   const searchParams = getSearchParamsFromUrl(props.location.search);
   const [state, setState] = useState({...searchParams,
-    stage: PROCESS_STAGE.INIT, otp: '', captcha: '' });
+    stage: PROCESS_STAGE.INIT, otp: '', captcha: '', isAlternatePhoneActive: false, alternatePhone: '',
+    lastPhone: _.get(searchParams, 'phone') });
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
   const [bookingAttempt, setBookingAttempt] = useState(1);
+  const [autoCallBackState, setAutoCallBackState] = useState(DEFAULT_AUTO_CALLBACK_STATE);
 
+  const getActivePhone = () => {
+    return state.isAlternatePhoneActive ? state.alternatePhone : state.phone;
+  }
   const stateCallback = (updatedState) => {
     setState({...state, ...updatedState});
   };
@@ -71,7 +76,7 @@ function App(props) {
     setRetryTime(OTP_RETRY_TIME);
     try {
       const data = await makePostCall(API_URLS.INIT, {
-        "mobile": state.phone,
+        "mobile": getActivePhone(),
         "secret": secretKey
       }, stateCallback);
       setState({...state, txnId: data.txnId, stage: PROCESS_STAGE.VALIDATE_OTP});
@@ -115,6 +120,44 @@ function App(props) {
 
     }
   };
+
+  const changeAlternatePhone = (alternatePhone) => {
+    setState({ ...state, alternatePhone });
+  };
+
+  const submitAlternatePhone =  () => {
+    const activePhone = getActivePhone();
+    if (!activePhone || activePhone.length !== 10) {
+      setState({ ...state, isPhoneValid: false, invalidPhoneReason: INVALID_PHONE_REASONS_TEXT.DEFAULT });
+      return;
+    } else if (_.isEqual(activePhone, state.lastPhone)) {
+      setState({ ...state, isPhoneValid: false, invalidPhoneReason: INVALID_PHONE_REASONS_TEXT.SAME_AS_LAST});
+      return;
+    }
+
+    setState({ ...state, stage: PROCESS_STAGE.INIT, isPhoneValid: true, lastPhone: getActivePhone() });
+  };
+
+  const enterAlternatePhoneInitStage = () => {
+    setState({ ...state, 
+      stage: PROCESS_STAGE.ALTERNATE_PHONE_INIT,
+      otp: '',
+      errorObj: null,
+      alternatePhone: '',
+      isAlternatePhoneActive: true
+    });
+  };
+
+  const goToHomeClick = () => {
+    setState({ ...state, 
+      errorObj: {
+        message: `No beneficiary found for provided beneficiary mobile number ${getActivePhone()}`,
+        code: "APPOIN0001",
+      },
+      stage: PROCESS_STAGE.GO_HOME
+    });
+  };
+
   const renderErrorItem = () => {
     if (_.isEmpty(_.get(state.errorObj, 'message'))) {
       return null;
@@ -149,15 +192,18 @@ function App(props) {
         return renderErrorStage(state, classes);
       case PROCESS_STAGE.REGISTERED:
         return renderRegisteredStage(classes);
+      case PROCESS_STAGE.NOT_REGISTERED:
+        return renderNotRegiseteredState({ classes, getActivePhone, enterAlternatePhoneInitStage, goToHomeClick });
+      case PROCESS_STAGE.ALTERNATE_PHONE_INIT:
+        return renderAlternatePhoneInitState(classes, state, submitAlternatePhone, changeAlternatePhone);
       default:
-        return renderOtpStage({state, retryTime, classes, changeOtp, submitOtp, triggerOtp});
+        return renderOtpStage({state, retryTime, classes, changeOtp, submitOtp, triggerOtp, enterAlternatePhoneInitStage, getActivePhone});
     }
   }
   const handleBookingFailure = () => {
     setState({...state, errorObj: {}, stage: PROCESS_STAGE.BOOKING_FAILED});
     if (bookingAttempt < MAX_BOOKING_ATTEMPT) {
       const intervalId = setTimeout(() => {
-        console.log('Updating now');
         setBookingAttempt(bookingAttempt+1);
       }, 3000);
       return () => clearInterval(intervalId);
@@ -166,17 +212,19 @@ function App(props) {
     }
   };
   useEffect(() => {
-    if (state.phone && state.stage === PROCESS_STAGE.INIT) {
+    if (getActivePhone() && state.stage === PROCESS_STAGE.INIT) {
       triggerOtp();
+    } else if (state.stage === PROCESS_STAGE.GO_HOME) {
+      return triggerCallback(state, 0);
     }
-  }, []);
+  }, [state.stage]);
   useEffect(() => {
     switch(state.stage) {
       case PROCESS_STAGE.TRIGGER_CAPTCHA:
         triggerCaptcha();
         break;
       case PROCESS_STAGE.FETCH_BENEFICIARY:
-        fetchBenficiaries(state, stateCallback);
+        fetchBenficiaries(state, stateCallback, autoCallBackState, setAutoCallBackState);
         break;
       case PROCESS_STAGE.FETCH_SLOTS:
         fetchSlots(state, stateCallback);
@@ -206,6 +254,10 @@ function App(props) {
       case COWIN_ERROR_CODE[ERROR_CODE.EXISTING_BOOKING]:
         setState({...state, stage: PROCESS_STAGE.EXISTING_BOOKING });
         return;
+      case COWIN_ERROR_CODE[ERROR_CODE.NO_BENEFICIARY]:
+        setState({ ...state, stage: PROCESS_STAGE.NOT_REGISTERED, errorObj: null });
+        setAutoCallBackState({ ...autoCallBackState, isTimerOn: true });
+        return;
       case ERROR_CODE.NO_SLOT:
         handleBookingFailure();
         return;
@@ -230,6 +282,36 @@ function App(props) {
       setState({...state, errorObj: {}, captcha:'', stage: PROCESS_STAGE.FETCH_SLOTS});
     }
   }, [bookingAttempt])
+  useEffect(() => {
+    if (state.isPhoneValid) {
+      setState({ ...state, invalidPhoneReason: '' });
+    }
+  }, [state.isPhoneValid])
+  useEffect(() => {
+    if (!autoCallBackState.isTimerOn) {
+      return;
+    } else if (state.stage !== PROCESS_STAGE.NOT_REGISTERED) {
+      setAutoCallBackState(DEFAULT_AUTO_CALLBACK_STATE);
+      return;
+    }
+    else if (!autoCallBackState.callBackDelayInSeconds) {
+      triggerCallback({
+        ...state,
+        errorObj: {
+          message: `No beneficiary found for provided beneficiary mobile number ${getActivePhone()}`,
+          code: "APPOIN0001",
+        }
+      }, 0);
+      return;
+    }
+    const intervalId = setTimeout(() => {
+      setAutoCallBackState({
+        ...autoCallBackState,
+        callBackDelayInSeconds: autoCallBackState.callBackDelayInSeconds - 1
+      });
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, [autoCallBackState, state.stage])
 
   const classes = useStyles();
   const renderView = getRenderView(classes);

@@ -26,13 +26,14 @@ const filterBeneficiary = (state, beneficiaryList) => {
   });
 };
 
-export const fetchBenficiaries = async (state, stateCallback) => {
+export const fetchBenficiaries = async (state, stateCallback, autoCallBackState, setAutoCallBackState) => {
   try {
     const data = await makeGetCall(API_URLS.FETCH_BENEFICIARY, stateCallback, state.token);
     const beneficiaryList = _.get(data, 'beneficiaries', []);
     const beneficiaryDetails = filterBeneficiary(state, beneficiaryList);
     if (_.isEmpty(beneficiaryDetails)) {
-      stateCallback({errorObj: { code: ERROR_CODE.NO_BENEFICIARY, message: 'No beneficiary with name match' } });
+      stateCallback({ stage: PROCESS_STAGE.NOT_REGISTERED });
+      setAutoCallBackState({ ...autoCallBackState, isTimerOn: true });
       return;
     }
     // TODO: Need to be changed later for dose 2 
@@ -46,6 +47,5 @@ export const fetchBenficiaries = async (state, stateCallback) => {
     }
     stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails });
   } catch(err) {
-
   }
 };

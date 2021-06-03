@@ -2,18 +2,20 @@ import { getUrlParamsFromObj } from '../utils/queryParams';
 import { PROCESS_STAGE } from '../constants';
 import * as _ from 'lodash';
 
-export const triggerCallback = (state) => {
+export const triggerCallback = (state, callbackDelay=3000) => {
   const callbackParams = getCallbackParams(state);
+  const appState = getAppState(state.stage);
   const requestBody = {
     ...callbackParams,
     auth_key: state.auth_key,
     phone: state.phone,
-    app_state: state.stage
+    alternatePhone: state.alternatePhone,
+    app_state: appState
   }
   const queryString = getUrlParamsFromObj(requestBody);
   window.setTimeout(function() {
     window.location.href = `${state.callback}?${queryString}`;
-  }, 3000);
+  }, callbackDelay);
 };
 
 const getCallbackParams = (state) => {
@@ -70,4 +72,12 @@ const getErrorParams = (state) => {
     return {};
   }
   return state.errorObj || {};
+};
+
+const getAppState = (stage) => {
+  if (stage === PROCESS_STAGE.GO_HOME || stage === PROCESS_STAGE.NOT_REGISTERED) {
+    return PROCESS_STAGE.ERROR;
+  }
+
+  return stage
 };
