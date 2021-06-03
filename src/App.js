@@ -130,12 +130,6 @@ function App(props) {
         message: INVALID_PHONE_REASONS_TEXT.DEFAULT
       }});
       return;
-    } else if (_.isEqual(activePhone, state.lastPhone)) {
-      setState({ ...state, errorObj: {
-        code: ERROR_CODE.INVALID_PHONE,
-        message: INVALID_PHONE_REASONS_TEXT.SAME_AS_LAST
-      }});
-      return;
     }
 
     setState({ ...state, stage: PROCESS_STAGE.INIT, lastPhone: state.registeredPhone, errorObj: null });

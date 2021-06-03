@@ -75,6 +75,6 @@ export const INVALID_PHONE_REASONS_TEXT = {
 };
 
 export const DEFAULT_AUTO_CALLBACK_STATE = {
-  callBackDelayInSeconds: 5,
+  callBackDelayInSeconds: 15,
   isTimerOn: false
 };
