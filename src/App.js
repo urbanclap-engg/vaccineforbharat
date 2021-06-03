@@ -53,15 +53,12 @@ function getRandomSecretKey() {
 function App(props) {
   const searchParams = getSearchParamsFromUrl(props.location.search);
   const [state, setState] = useState({...searchParams,
-    stage: PROCESS_STAGE.INIT, otp: '', captcha: '', isAlternatePhoneActive: false, alternatePhone: '',
+    stage: PROCESS_STAGE.INIT, otp: '', captcha: '', registeredPhone: _.get(searchParams, 'phone'),
     lastPhone: _.get(searchParams, 'phone') });
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
   const [bookingAttempt, setBookingAttempt] = useState(1);
   const [autoCallBackState, setAutoCallBackState] = useState(DEFAULT_AUTO_CALLBACK_STATE);
 
-  const getActivePhone = () => {
-    return state.isAlternatePhoneActive ? state.alternatePhone : state.phone;
-  }
   const stateCallback = (updatedState) => {
     setState({...state, ...updatedState});
   };
@@ -76,7 +73,7 @@ function App(props) {
     setRetryTime(OTP_RETRY_TIME);
     try {
       const data = await makePostCall(API_URLS.INIT, {
-        "mobile": getActivePhone(),
+        "mobile": state.registeredPhone,
         "secret": secretKey
       }, stateCallback);
       setState({...state, txnId: data.txnId, stage: PROCESS_STAGE.VALIDATE_OTP});
@@ -121,21 +118,27 @@ function App(props) {
     }
   };
 
-  const changeAlternatePhone = (alternatePhone) => {
-    setState({ ...state, alternatePhone });
+  const changeRegisteredPhone = (registeredPhone) => {
+    setState({ ...state, registeredPhone });
   };
 
-  const submitAlternatePhone =  () => {
-    const activePhone = getActivePhone();
-    if (!activePhone || activePhone.length !== 10) {
-      setState({ ...state, isPhoneValid: false, invalidPhoneReason: INVALID_PHONE_REASONS_TEXT.DEFAULT });
+  const submitRegisteredPhone =  () => {
+    const activePhone = state.registeredPhone;
+    if (!activePhone || _.size(activePhone) !== 10) {
+      setState({ ...state, errorObj: {
+        code: ERROR_CODE.INVALID_PHONE,
+        message: INVALID_PHONE_REASONS_TEXT.DEFAULT
+      }});
       return;
     } else if (_.isEqual(activePhone, state.lastPhone)) {
-      setState({ ...state, isPhoneValid: false, invalidPhoneReason: INVALID_PHONE_REASONS_TEXT.SAME_AS_LAST});
+      setState({ ...state, errorObj: {
+        code: ERROR_CODE.INVALID_PHONE,
+        message: INVALID_PHONE_REASONS_TEXT.SAME_AS_LAST
+      }});
       return;
     }
 
-    setState({ ...state, stage: PROCESS_STAGE.INIT, isPhoneValid: true, lastPhone: getActivePhone() });
+    setState({ ...state, stage: PROCESS_STAGE.INIT, lastPhone: state.registeredPhone, errorObj: null });
   };
 
   const enterAlternatePhoneInitStage = () => {
@@ -143,19 +146,18 @@ function App(props) {
       stage: PROCESS_STAGE.ALTERNATE_PHONE_INIT,
       otp: '',
       errorObj: null,
-      alternatePhone: '',
-      isAlternatePhoneActive: true
+      registeredPhone: ''
     });
   };
 
   const goToHomeClick = () => {
-    setState({ ...state, 
+    triggerCallback({ ...state, 
       errorObj: {
-        message: `No beneficiary found for provided beneficiary mobile number ${getActivePhone()}`,
-        code: "APPOIN0001",
+        message: `No beneficiary found for provided beneficiary mobile number ${state.registeredPhone}`,
+        code: "APPOIN0001"
       },
-      stage: PROCESS_STAGE.GO_HOME
-    });
+      stage: PROCESS_STAGE.ERROR
+    }, 0);
   };
 
   const renderErrorItem = () => {
@@ -193,11 +195,12 @@ function App(props) {
       case PROCESS_STAGE.REGISTERED:
         return renderRegisteredStage(classes);
       case PROCESS_STAGE.NOT_REGISTERED:
-        return renderNotRegiseteredState({ classes, getActivePhone, enterAlternatePhoneInitStage, goToHomeClick });
+        return renderNotRegiseteredState({ classes, registeredPhone: state.registeredPhone, 
+          enterAlternatePhoneInitStage, goToHomeClick, autoCallBackState });
       case PROCESS_STAGE.ALTERNATE_PHONE_INIT:
-        return renderAlternatePhoneInitState(classes, state, submitAlternatePhone, changeAlternatePhone);
+        return renderAlternatePhoneInitState(classes, state, submitRegisteredPhone, changeRegisteredPhone);
       default:
-        return renderOtpStage({state, retryTime, classes, changeOtp, submitOtp, triggerOtp, enterAlternatePhoneInitStage, getActivePhone});
+        return renderOtpStage({state, retryTime, classes, changeOtp, submitOtp, triggerOtp, enterAlternatePhoneInitStage});
     }
   }
   const handleBookingFailure = () => {
@@ -212,10 +215,8 @@ function App(props) {
     }
   };
   useEffect(() => {
-    if (getActivePhone() && state.stage === PROCESS_STAGE.INIT) {
+    if (state.registeredPhone && state.stage === PROCESS_STAGE.INIT) {
       triggerOtp();
-    } else if (state.stage === PROCESS_STAGE.GO_HOME) {
-      return triggerCallback(state, 0);
     }
   }, [state.stage]);
   useEffect(() => {
@@ -246,6 +247,8 @@ function App(props) {
       return;
     }
     switch(state.errorObj.code) {
+      case ERROR_CODE.INVALID_PHONE:
+        return;
       case COWIN_ERROR_CODE[ERROR_CODE.INVALID_OTP]:
         return;
       case COWIN_ERROR_CODE[ERROR_CODE.INVALID_CAPTCHA]:
@@ -283,27 +286,20 @@ function App(props) {
     }
   }, [bookingAttempt])
   useEffect(() => {
-    if (state.isPhoneValid) {
-      setState({ ...state, invalidPhoneReason: '' });
-    }
-  }, [state.isPhoneValid])
-  useEffect(() => {
-    if (!autoCallBackState.isTimerOn) {
+    if (state.stage === PROCESS_STAGE.NOT_REGISTERED && autoCallBackState.callBackDelayInSeconds <= 0) {
+      triggerCallback({
+        ...state,
+        errorObj: {
+          message: `No beneficiary found for provided beneficiary mobile number ${state.registeredPhone}`,
+          code: "APPOIN0001",
+        }
+      }, 0);
       return;
     } else if (state.stage !== PROCESS_STAGE.NOT_REGISTERED) {
       setAutoCallBackState(DEFAULT_AUTO_CALLBACK_STATE);
       return;
     }
-    else if (!autoCallBackState.callBackDelayInSeconds) {
-      triggerCallback({
-        ...state,
-        errorObj: {
-          message: `No beneficiary found for provided beneficiary mobile number ${getActivePhone()}`,
-          code: "APPOIN0001",
-        }
-      }, 0);
-      return;
-    }
+
     const intervalId = setTimeout(() => {
       setAutoCallBackState({
         ...autoCallBackState,

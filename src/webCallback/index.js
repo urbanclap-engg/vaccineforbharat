@@ -9,7 +9,7 @@ export const triggerCallback = (state, callbackDelay=3000) => {
     ...callbackParams,
     auth_key: state.auth_key,
     phone: state.phone,
-    alternatePhone: state.alternatePhone,
+    alternatePhone: state.registeredPhone,
     app_state: appState
   }
   const queryString = getUrlParamsFromObj(requestBody);

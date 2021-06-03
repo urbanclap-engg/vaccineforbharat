@@ -27,7 +27,7 @@ const getRetryElement = (classes) => {
 };
 
 export const renderOtpStage = (params) => {
-  const { state, retryTime, classes, changeOtp, submitOtp, triggerOtp, enterAlternatePhoneInitStage, getActivePhone } = params;
+  const { state, retryTime, classes, changeOtp, submitOtp, triggerOtp, enterAlternatePhoneInitStage } = params;
   const retryEnabled = (retryTime < 1);
   const retryTimeString = getMinuteString(retryTime);
   return (
@@ -48,7 +48,7 @@ export const renderOtpStage = (params) => {
         <Typography variant='subtitle2'>
           <Box my={2}>
             <Box>
-              OTP sent to {getActivePhone()}
+              OTP sent to {state.registeredPhone}
             </Box>
             <Link onClick={enterAlternatePhoneInitStage}>
               Vaccine registered on different number?
@@ -278,7 +278,7 @@ export const renderRegisteredStage = (classes) => {
 };
 
 export const renderNotRegiseteredState = (params) => {
-  const { classes, getActivePhone, enterAlternatePhoneInitStage, goToHomeClick } = params;
+  const { classes, registeredPhone, enterAlternatePhoneInitStage, goToHomeClick, autoCallBackState } = params;
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
@@ -291,7 +291,12 @@ export const renderNotRegiseteredState = (params) => {
       <Grid item lg={12}>
         <Typography variant="h6">
             <Box fontWeight="fontWeightBold" my={2}>
-              No vaccination registration found for {getActivePhone()}
+              No vaccination registration found for {registeredPhone}
+              {autoCallBackState.isTimerOn &&
+                <Typography>
+                  ⌛ Taking you back in {autoCallBackState.callBackDelayInSeconds}
+                </Typography>
+              }
             </Box>
         </Typography>
       </Grid>
@@ -321,7 +326,7 @@ export const renderNotRegiseteredState = (params) => {
   )
 };
 
-export const renderAlternatePhoneInitState = (classes, state, submitAlternatePhone, changeAlternatePhone) => {
+export const renderAlternatePhoneInitState = (classes, state, submitRegisteredPhone, changeRegisteredPhone) => {
   return (
     <Grid alignItems="center" justify="center" direction="column">
       <Grid item lg={12}>
@@ -340,24 +345,17 @@ export const renderAlternatePhoneInitState = (classes, state, submitAlternatePho
           id="alternatePhone"
           label="Phone number"
           variant="outlined"
-          value={state.alternatePhone}
-          onChange={e => changeAlternatePhone(e.target.value)}
+          value={state.registeredPhone}
+          onChange={e => changeRegisteredPhone(e.target.value)}
         />
       </Grid>
-      { !state.isPhoneValid && 
-        <Typography variant="subtitle2">
-          <Box color="#ff0000">
-            {state.invalidPhoneReason}
-          </Box>
-        </Typography>
-      }
       <Grid item lg={12}>
         <Button className={classes.button}
           variant="contained"
           color="primary"
           fullWidth={true}
-          id="submitAlternatePhone"
-          onClick={submitAlternatePhone}>
+          id="submitRegisteredPhone"
+          onClick={submitRegisteredPhone}>
           <Typography variant="subtitle1">
               Send OTP
           </Typography>
