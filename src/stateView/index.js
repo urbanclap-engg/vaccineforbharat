@@ -278,7 +278,7 @@ export const renderRegisteredStage = (classes) => {
 };
 
 export const renderNotRegiseteredState = (params) => {
-  const { classes, registeredPhone, enterAlternatePhoneInitStage, goToHomeClick, autoCallBackState } = params;
+  const { classes, registeredPhone, enterAlternatePhoneInitStage, goToHome, autoCallBackState } = params;
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
@@ -311,12 +311,12 @@ export const renderNotRegiseteredState = (params) => {
               Vaccine registered on different number?
             </Typography>
         </Button>
-        <Button className={classes.button}
+        <Button className={classes.goHomeButton}
           variant="contained"
           color="primary"
           //size="small"
           fullWidth={true}
-          onClick={goToHomeClick}>
+          onClick={goToHome}>
             <Typography variant="subtitle2">
               Go to home
             </Typography>

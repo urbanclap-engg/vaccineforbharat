@@ -40,6 +40,9 @@ const useStyles = makeStyles({
   button: {
     marginTop: 10
   },
+  goHomeButton: {
+    marginTop: 20
+  },
   body: {
     marginTop: '5%',
   }
@@ -124,7 +127,7 @@ function App(props) {
 
   const submitRegisteredPhone =  () => {
     const activePhone = state.registeredPhone;
-    if (!activePhone || _.size(activePhone) !== 10) {
+    if (_.size(activePhone) !== 10) {
       setState({ ...state, errorObj: {
         code: ERROR_CODE.INVALID_PHONE,
         message: INVALID_PHONE_REASONS_TEXT.DEFAULT
@@ -144,7 +147,7 @@ function App(props) {
     });
   };
 
-  const goToHomeClick = () => {
+  const goToHome = () => {
     triggerCallback({ ...state, 
       errorObj: {
         message: `No beneficiary found for provided beneficiary mobile number ${state.registeredPhone}`,
@@ -190,7 +193,7 @@ function App(props) {
         return renderRegisteredStage(classes);
       case PROCESS_STAGE.NOT_REGISTERED:
         return renderNotRegiseteredState({ classes, registeredPhone: state.registeredPhone, 
-          enterAlternatePhoneInitStage, goToHomeClick, autoCallBackState });
+          enterAlternatePhoneInitStage, goToHome, autoCallBackState });
       case PROCESS_STAGE.ALTERNATE_PHONE_INIT:
         return renderAlternatePhoneInitState(classes, state, submitRegisteredPhone, changeRegisteredPhone);
       default:
@@ -209,17 +212,17 @@ function App(props) {
     }
   };
   useEffect(() => {
-    if (state.registeredPhone && state.stage === PROCESS_STAGE.INIT) {
-      triggerOtp();
-    }
-  }, [state.stage]);
-  useEffect(() => {
     switch(state.stage) {
+      case PROCESS_STAGE.INIT:
+        if (state.registeredPhone) {
+          triggerOtp();
+        }
+        break;
       case PROCESS_STAGE.TRIGGER_CAPTCHA:
         triggerCaptcha();
         break;
       case PROCESS_STAGE.FETCH_BENEFICIARY:
-        fetchBenficiaries(state, stateCallback, autoCallBackState, setAutoCallBackState);
+        fetchBenficiaries(state, stateCallback);
         break;
       case PROCESS_STAGE.FETCH_SLOTS:
         fetchSlots(state, stateCallback);
@@ -231,9 +234,14 @@ function App(props) {
       case PROCESS_STAGE.ERROR:
         triggerCallback(state);
         break;
+      case PROCESS_STAGE.NOT_REGISTERED:
+        setAutoCallBackState({ ...DEFAULT_AUTO_CALLBACK_STATE, isTimerOn: true });
+        return;
       default:
         break;
     }
+
+    setAutoCallBackState(DEFAULT_AUTO_CALLBACK_STATE);
   }, [state.stage]);
   useEffect(() => {
     const code = _.get(state.errorObj, 'code');
@@ -253,7 +261,6 @@ function App(props) {
         return;
       case COWIN_ERROR_CODE[ERROR_CODE.NO_BENEFICIARY]:
         setState({ ...state, stage: PROCESS_STAGE.NOT_REGISTERED, errorObj: null });
-        setAutoCallBackState({ ...autoCallBackState, isTimerOn: true });
         return;
       case ERROR_CODE.NO_SLOT:
         handleBookingFailure();
@@ -280,7 +287,10 @@ function App(props) {
     }
   }, [bookingAttempt])
   useEffect(() => {
-    if (state.stage === PROCESS_STAGE.NOT_REGISTERED && autoCallBackState.callBackDelayInSeconds <= 0) {
+    if (!autoCallBackState.isTimerOn) {
+      return;
+    }
+    if (autoCallBackState.callBackDelayInSeconds <= 0) {
       triggerCallback({
         ...state,
         errorObj: {
@@ -288,9 +298,6 @@ function App(props) {
           code: "APPOIN0001",
         }
       }, 0);
-      return;
-    } else if (state.stage !== PROCESS_STAGE.NOT_REGISTERED) {
-      setAutoCallBackState(DEFAULT_AUTO_CALLBACK_STATE);
       return;
     }
 
@@ -301,7 +308,7 @@ function App(props) {
       });
     }, 1000);
     return () => clearInterval(intervalId);
-  }, [autoCallBackState, state.stage])
+  }, [autoCallBackState])
 
   const classes = useStyles();
   const renderView = getRenderView(classes);

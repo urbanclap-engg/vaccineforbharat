@@ -26,14 +26,13 @@ const filterBeneficiary = (state, beneficiaryList) => {
   });
 };
 
-export const fetchBenficiaries = async (state, stateCallback, autoCallBackState, setAutoCallBackState) => {
+export const fetchBenficiaries = async (state, stateCallback) => {
   try {
     const data = await makeGetCall(API_URLS.FETCH_BENEFICIARY, stateCallback, state.token);
     const beneficiaryList = _.get(data, 'beneficiaries', []);
     const beneficiaryDetails = filterBeneficiary(state, beneficiaryList);
     if (_.isEmpty(beneficiaryDetails)) {
       stateCallback({ stage: PROCESS_STAGE.NOT_REGISTERED });
-      setAutoCallBackState({ ...autoCallBackState, isTimerOn: true });
       return;
     }
     // TODO: Need to be changed later for dose 2 

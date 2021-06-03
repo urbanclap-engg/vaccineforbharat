@@ -75,7 +75,7 @@ const getErrorParams = (state) => {
 };
 
 const getAppState = (stage) => {
-  if (stage === PROCESS_STAGE.GO_HOME || stage === PROCESS_STAGE.NOT_REGISTERED) {
+  if (stage === PROCESS_STAGE.NOT_REGISTERED) {
     return PROCESS_STAGE.ERROR;
   }
 
