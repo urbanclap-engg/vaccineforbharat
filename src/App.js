@@ -106,7 +106,11 @@ function App(props) {
         "dose": _.isEmpty(state.beneficiaryDetails.dose1_date)?1:2
       }, stateCallback, state.token);
       const appointmentId = _.get(data, 'appointment_confirmation_no');
-      setState({...state, errorObj:{}, stage: PROCESS_STAGE.SLOT_BOOKED, appointmentId })
+      if (!_.isEmpty(appointmentId)) {
+        setState({...state, errorObj:{}, stage: PROCESS_STAGE.SLOT_BOOKED, appointmentId })
+      } else {
+        setState({...state, errorObj:{ code: ERROR_CODE.BOOKING_FAILED, message: 'Appointment not confirmed' } })
+      }
     } catch(err) {
     }
   };
