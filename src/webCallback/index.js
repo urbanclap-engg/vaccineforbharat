@@ -48,6 +48,7 @@ const getCallbackParams = (state) => {
       };
     case PROCESS_STAGE.SLOT_BOOKED:
       const { vaccineSlot={}, appointmentId } = state;
+      const vaccineFee = getVaccineFee(vaccineSlot);
       return {
         ...baseState,
         appointment_id: appointmentId,
@@ -59,6 +60,8 @@ const getCallbackParams = (state) => {
         slot: vaccineSlot.slot_time,
         session_id: vaccineSlot.session_id,
         date: vaccineSlot.date,
+        vaccine_fee: vaccineFee,
+        vaccine: vaccineSlot.vaccine,
         // TODO dose 2 handling
         dose: 1
       };
@@ -80,4 +83,12 @@ const getAppState = (stage) => {
   }
 
   return stage
+};
+
+const getVaccineFee = (vaccineSlot = {}) => {
+  const vaccineFeeRates = _.get(vaccineSlot, 'vaccine_fees', []);
+  const selectedVaccineRate = _.find(vaccineFeeRates, (entry = {}) => {
+    return entry.vaccine === vaccineSlot.vaccine;
+  });
+  return _.get(selectedVaccineRate, 'fee', '0');
 };

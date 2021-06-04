@@ -46,7 +46,7 @@ export const getCurrentDateString = () => {
   const mm = today.getMonth() + 1;
   const yyyy = today.getFullYear();
 
-  return `${dd}-${(mm>9 ? '' : '0') + mm}-${yyyy}`;
+  return `${(dd>9 ? '' : '0') + dd}-${(mm>9 ? '' : '0') + mm}-${yyyy}`;
 };
 
 export const getSlotDateString = () => {
