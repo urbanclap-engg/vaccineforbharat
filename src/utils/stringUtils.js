@@ -51,13 +51,12 @@ export const getCurrentDateString = () => {
 
 export const getSlotDateString = () => {
   const today = new Date();
-  let dd = today.getDate();
-  const mm = today.getMonth() + 1;
-  const yyyy = today.getFullYear();
-  const currentHour = today.getHours();
-  if (currentHour > SLOT_CUTOFF_HOUR) {
-    dd += 1;
-  }
+  const nextDay = new Date(today);
+  nextDay.setDate(today.getDate() + 1);
+  const dd = nextDay.getDate();
+  const mm = nextDay.getMonth() + 1;
+  const yyyy = nextDay.getFullYear();
+
   return `${dd}-${(mm>9 ? '' : '0') + mm}-${yyyy}`;
 };
 

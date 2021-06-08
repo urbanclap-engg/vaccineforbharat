@@ -157,16 +157,12 @@ function App(props) {
 
   const goToHome = () => {
     triggerCallback({ ...state, 
-      errorObj: {
-        message: JSON.stringify(registeredBeneficiaryList),
-        code: "APPOIN0001"
-      },
       stage: PROCESS_STAGE.ERROR
     }, 0);
   };
 
   const renderErrorItem = () => {
-    if (_.isEmpty(_.get(state.errorObj, 'message'))) {
+    if (_.isEmpty(_.get(state.errorObj, 'message')) || _.get(state, 'errorObj.code') === ERROR_CODE.NO_BENEFICIARY) {
       return null;
     }
     return (
@@ -244,6 +240,10 @@ function App(props) {
         break;
       case PROCESS_STAGE.NOT_REGISTERED:
         setAutoCallBackState({ ...DEFAULT_AUTO_CALLBACK_STATE, isTimerOn: true });
+        setState({ ...state, errorObj: {
+          code: ERROR_CODE.NO_BENEFICIARY,
+          message: _.join(registeredBeneficiaryList, ',')
+        }});
         return;
       default:
         break;
@@ -273,6 +273,8 @@ function App(props) {
       case ERROR_CODE.NO_SLOT:
         handleBookingFailure();
         return;
+      case ERROR_CODE.NO_BENEFICIARY:
+        return;
       default:
         if (state.stage === PROCESS_STAGE.SCHEDULE) {
           handleBookingFailure();
@@ -299,13 +301,7 @@ function App(props) {
       return;
     }
     if (autoCallBackState.callBackDelayInSeconds <= 0) {
-      triggerCallback({
-        ...state,
-        errorObj: {
-          message: JSON.stringify(registeredBeneficiaryList),
-          code: "APPOIN0001"
-        }
-      }, 0);
+      triggerCallback(state, 0);
       return;
     }
 
