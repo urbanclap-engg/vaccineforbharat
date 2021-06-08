@@ -57,16 +57,11 @@ function App(props) {
   const searchParams = getSearchParamsFromUrl(props.location.search);
   const [state, setState] = useState({...searchParams,
     stage: PROCESS_STAGE.INIT, otp: '', captcha: '', registeredPhone: _.get(searchParams, 'phone'),
-    lastPhone: _.get(searchParams, 'phone') });
+    lastPhone: _.get(searchParams, 'phone'), registeredBeneficiaryList: [] });
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
   const [bookingAttempt, setBookingAttempt] = useState(1);
   const [autoCallBackState, setAutoCallBackState] = useState(DEFAULT_AUTO_CALLBACK_STATE);
-  //COMMENT: Store it in original state like other params, no special handling required
-  const [registeredBeneficiaryList, setRegisteredBeneficiaryList] = useState([]);
 
-  const updateRegisteredBeneficiaryList = (newBeneficiaries) => {
-    setRegisteredBeneficiaryList(_.uniqWith(registeredBeneficiaryList.concat(newBeneficiaries), _.isEqual));
-  };
   const stateCallback = (updatedState) => {
     setState({...state, ...updatedState});
   };
@@ -157,9 +152,7 @@ function App(props) {
   };
 
   const goToHome = () => {
-    triggerCallback({ ...state, 
-      stage: PROCESS_STAGE.ERROR
-    }, 0);
+    triggerCallback(state, 0);
   };
 
   const renderErrorItem = () => {
@@ -227,7 +220,7 @@ function App(props) {
         triggerCaptcha();
         break;
       case PROCESS_STAGE.FETCH_BENEFICIARY:
-        fetchBenficiaries(state, stateCallback, updateRegisteredBeneficiaryList);
+        fetchBenficiaries(state, stateCallback);
         break;
       case PROCESS_STAGE.FETCH_SLOTS:
         fetchSlots(state, stateCallback);
@@ -239,13 +232,8 @@ function App(props) {
       case PROCESS_STAGE.ERROR:
         triggerCallback(state);
         break;
-      //COMMENT: This shouldn't require any change, callback should handle.
       case PROCESS_STAGE.NOT_REGISTERED:
         setAutoCallBackState({ ...DEFAULT_AUTO_CALLBACK_STATE, isTimerOn: true });
-        setState({ ...state, errorObj: {
-          code: ERROR_CODE.NO_BENEFICIARY,
-          message: _.join(registeredBeneficiaryList, ',')
-        }});
         return;
       default:
         break;

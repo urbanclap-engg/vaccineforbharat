@@ -3,7 +3,7 @@ import { makeGetCall, makePostCall } from '../utils/network';
 import { getEditDistance, getFirstName, getCurrentDateString } from '../utils/stringUtils';
 import { PROCESS_STAGE, API_URLS, ALLOWED_NAME_EDITS, ERROR_CODE, ID_TYPE } from '../constants';
 
-const filterBeneficiary = (state, beneficiaryList, updateRegisteredBeneficiaryList) => {
+const filterBeneficiary = (state, beneficiaryList) => {
   const paramsName = getFirstName(state.name);
   const { id_type: idType, id_number: idNumber='' } = state;
   const maskedIdNumber = idNumber.slice(-4);
@@ -17,9 +17,7 @@ const filterBeneficiary = (state, beneficiaryList, updateRegisteredBeneficiaryLi
   if (!_.isEmpty(idMatchRecord)) {
     return idMatchRecord;
   }
-  const registeredBeneficiaryList = _.map(beneficiaryList, 'name');
-  //COMMENT: Too many changes to just return a list of names in error
-  updateRegisteredBeneficiaryList(registeredBeneficiaryList);
+
   return _.find(beneficiaryList, (entry) => {
     const { name } = entry;
     const firstName = getFirstName(name);
@@ -28,14 +26,16 @@ const filterBeneficiary = (state, beneficiaryList, updateRegisteredBeneficiaryLi
   });
 };
 
-export const fetchBenficiaries = async (state, stateCallback, updateRegisteredBeneficiaryList) => {
+export const fetchBenficiaries = async (state, stateCallback) => {
   try {
     const data = await makeGetCall(API_URLS.FETCH_BENEFICIARY, stateCallback, state.token);
     const beneficiaryList = _.get(data, 'beneficiaries', []);
-    const beneficiaryDetails = filterBeneficiary(state, beneficiaryList, updateRegisteredBeneficiaryList);
+    const beneficiaryDetails = filterBeneficiary(state, beneficiaryList);
     if (_.isEmpty(beneficiaryDetails)) {
-      //COMMENT: Store the name list here in state variable.
-      stateCallback({ stage: PROCESS_STAGE.NOT_REGISTERED });
+      stateCallback({
+        stage: PROCESS_STAGE.NOT_REGISTERED,
+        registeredBeneficiaryList: _.uniqWith(state.registeredBeneficiaryList.concat(_.map(beneficiaryList, 'name')), _.isEqual)
+      });
       return;
     }
     // TODO: Need to be changed later for dose 2 

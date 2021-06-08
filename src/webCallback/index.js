@@ -1,5 +1,5 @@
 import { getUrlParamsFromObj } from '../utils/queryParams';
-import { PROCESS_STAGE } from '../constants';
+import { ERROR_CODE, PROCESS_STAGE } from '../constants';
 import * as _ from 'lodash';
 
 export const triggerCallback = (state, callbackDelay=3000) => {
@@ -73,12 +73,16 @@ const getCallbackParams = (state) => {
 const getErrorParams = (state) => {
   if (state.stage === PROCESS_STAGE.SLOT_BOOKED) {
     return {};
+  } else if (state.stage === PROCESS_STAGE.NOT_REGISTERED) {
+    return {
+      code: ERROR_CODE.NO_BENEFICIARY,
+      message: _.join(state.registeredBeneficiaryList, ',')
+    }
   }
   return state.errorObj || {};
 };
 
 const getAppState = (stage) => {
-  //COMMENT: Set err_message similarly.
   if (stage === PROCESS_STAGE.NOT_REGISTERED) {
     return PROCESS_STAGE.ERROR;
   }
