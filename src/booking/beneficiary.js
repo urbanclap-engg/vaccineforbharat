@@ -3,7 +3,7 @@ import { makeGetCall, makePostCall } from '../utils/network';
 import { getEditDistance, getFirstName, getCurrentDateString } from '../utils/stringUtils';
 import { PROCESS_STAGE, API_URLS, ALLOWED_NAME_EDITS, ERROR_CODE, ID_TYPE } from '../constants';
 
-const filterBeneficiary = (state, beneficiaryList) => {
+const filterBeneficiary = (state, beneficiaryList, updateRegisteredBeneficiaryList) => {
   const paramsName = getFirstName(state.name);
   const { id_type: idType, id_number: idNumber='' } = state;
   const maskedIdNumber = idNumber.slice(-4);
@@ -17,7 +17,8 @@ const filterBeneficiary = (state, beneficiaryList) => {
   if (!_.isEmpty(idMatchRecord)) {
     return idMatchRecord;
   }
-
+  const registeredBeneficiaryList = _.map(beneficiaryList, 'name');
+  updateRegisteredBeneficiaryList(registeredBeneficiaryList);
   return _.find(beneficiaryList, (entry) => {
     const { name } = entry;
     const firstName = getFirstName(name);
@@ -26,11 +27,11 @@ const filterBeneficiary = (state, beneficiaryList) => {
   });
 };
 
-export const fetchBenficiaries = async (state, stateCallback) => {
+export const fetchBenficiaries = async (state, stateCallback, updateRegisteredBeneficiaryList) => {
   try {
     const data = await makeGetCall(API_URLS.FETCH_BENEFICIARY, stateCallback, state.token);
     const beneficiaryList = _.get(data, 'beneficiaries', []);
-    const beneficiaryDetails = filterBeneficiary(state, beneficiaryList);
+    const beneficiaryDetails = filterBeneficiary(state, beneficiaryList, updateRegisteredBeneficiaryList);
     if (_.isEmpty(beneficiaryDetails)) {
       stateCallback({ stage: PROCESS_STAGE.NOT_REGISTERED });
       return;

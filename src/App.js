@@ -61,7 +61,11 @@ function App(props) {
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
   const [bookingAttempt, setBookingAttempt] = useState(1);
   const [autoCallBackState, setAutoCallBackState] = useState(DEFAULT_AUTO_CALLBACK_STATE);
+  const [registeredBeneficiaryList, setRegisteredBeneficiaryList] = useState([]);
 
+  const updateRegisteredBeneficiaryList = (newBeneficiaries) => {
+    setRegisteredBeneficiaryList(_.uniqWith(registeredBeneficiaryList.concat(newBeneficiaries), _.isEqual));
+  };
   const stateCallback = (updatedState) => {
     setState({...state, ...updatedState});
   };
@@ -154,7 +158,7 @@ function App(props) {
   const goToHome = () => {
     triggerCallback({ ...state, 
       errorObj: {
-        message: `No beneficiary found for provided beneficiary mobile number ${state.registeredPhone}`,
+        message: JSON.stringify(registeredBeneficiaryList),
         code: "APPOIN0001"
       },
       stage: PROCESS_STAGE.ERROR
@@ -226,7 +230,7 @@ function App(props) {
         triggerCaptcha();
         break;
       case PROCESS_STAGE.FETCH_BENEFICIARY:
-        fetchBenficiaries(state, stateCallback);
+        fetchBenficiaries(state, stateCallback, updateRegisteredBeneficiaryList);
         break;
       case PROCESS_STAGE.FETCH_SLOTS:
         fetchSlots(state, stateCallback);
@@ -298,8 +302,8 @@ function App(props) {
       triggerCallback({
         ...state,
         errorObj: {
-          message: `No beneficiary found for provided beneficiary mobile number ${state.registeredPhone}`,
-          code: "APPOIN0001",
+          message: JSON.stringify(registeredBeneficiaryList),
+          code: "APPOIN0001"
         }
       }, 0);
       return;
