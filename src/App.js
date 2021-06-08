@@ -61,6 +61,7 @@ function App(props) {
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
   const [bookingAttempt, setBookingAttempt] = useState(1);
   const [autoCallBackState, setAutoCallBackState] = useState(DEFAULT_AUTO_CALLBACK_STATE);
+  //COMMENT: Store it in original state like other params, no special handling required
   const [registeredBeneficiaryList, setRegisteredBeneficiaryList] = useState([]);
 
   const updateRegisteredBeneficiaryList = (newBeneficiaries) => {
@@ -238,6 +239,7 @@ function App(props) {
       case PROCESS_STAGE.ERROR:
         triggerCallback(state);
         break;
+      //COMMENT: This shouldn't require any change, callback should handle.
       case PROCESS_STAGE.NOT_REGISTERED:
         setAutoCallBackState({ ...DEFAULT_AUTO_CALLBACK_STATE, isTimerOn: true });
         setState({ ...state, errorObj: {

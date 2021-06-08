@@ -78,6 +78,7 @@ const getErrorParams = (state) => {
 };
 
 const getAppState = (stage) => {
+  //COMMENT: Set err_message similarly.
   if (stage === PROCESS_STAGE.NOT_REGISTERED) {
     return PROCESS_STAGE.ERROR;
   }

@@ -18,6 +18,7 @@ const filterBeneficiary = (state, beneficiaryList, updateRegisteredBeneficiaryLi
     return idMatchRecord;
   }
   const registeredBeneficiaryList = _.map(beneficiaryList, 'name');
+  //COMMENT: Too many changes to just return a list of names in error
   updateRegisteredBeneficiaryList(registeredBeneficiaryList);
   return _.find(beneficiaryList, (entry) => {
     const { name } = entry;
@@ -33,6 +34,7 @@ export const fetchBenficiaries = async (state, stateCallback, updateRegisteredBe
     const beneficiaryList = _.get(data, 'beneficiaries', []);
     const beneficiaryDetails = filterBeneficiary(state, beneficiaryList, updateRegisteredBeneficiaryList);
     if (_.isEmpty(beneficiaryDetails)) {
+      //COMMENT: Store the name list here in state variable.
       stateCallback({ stage: PROCESS_STAGE.NOT_REGISTERED });
       return;
     }
