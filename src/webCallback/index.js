@@ -74,14 +74,10 @@ const getErrorParams = (state) => {
   if (state.stage === PROCESS_STAGE.SLOT_BOOKED) {
     return {};
   } else if (state.stage === PROCESS_STAGE.NOT_REGISTERED) {
-    if (!_.size(state.registeredBeneficiaryList)) {
-      return state.errorObj || {};
-    }
-
-    return {
+    return !_.isEmpty(state.errorObj) ? state.errorObj : {
       code: ERROR_CODE.NO_BENEFICIARY,
       message: _.join(state.registeredBeneficiaryList, ',')
-    }
+    };
   }
   return state.errorObj || {};
 };

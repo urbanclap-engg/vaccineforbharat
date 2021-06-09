@@ -19,13 +19,20 @@ const filterBeneficiary = (state, beneficiaryList) => {
     return idMatchRecord;
   }
 
+  const displayNameMatchedBeneficiary = _.find(beneficiaryList, ({ name }) => {
+    const firstName = getFirstName(name);
+    const displayNameEditDistanceScore = getEditDistance(paramsDisplayName, firstName);
+    return displayNameEditDistanceScore < ALLOWED_NAME_EDITS;
+  });
+  if (!_.isEmpty(displayNameMatchedBeneficiary)) {
+    return displayNameMatchedBeneficiary;
+  }
+
   return _.find(beneficiaryList, (entry) => {
     const { name } = entry;
     const firstName = getFirstName(name);
     const verifiedNameEditDistanceScore = getEditDistance(paramsVerifiedName, firstName);
-    const displayNameEditDistanceScore = getEditDistance(paramsDisplayName, firstName);
-    console.log(displayNameEditDistanceScore);
-    return verifiedNameEditDistanceScore < ALLOWED_NAME_EDITS || displayNameEditDistanceScore < ALLOWED_NAME_EDITS;
+    return verifiedNameEditDistanceScore < ALLOWED_NAME_EDITS;
   });
 };
 
