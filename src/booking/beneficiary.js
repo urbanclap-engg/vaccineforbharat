@@ -4,7 +4,7 @@ import { getEditDistance, getFirstName, getCurrentDateString } from '../utils/st
 import { PROCESS_STAGE, API_URLS, ALLOWED_NAME_EDITS, ERROR_CODE, ID_TYPE } from '../constants';
 
 const filterBeneficiary = (state, beneficiaryList) => {
-  const paramsVerifiedName = getFirstName(state.name);
+  const paramsName = getFirstName(state.name);
   const paramsDisplayName = getFirstName(state.displayName);
   const { id_type: idType, id_number: idNumber='' } = state;
   const maskedIdNumber = idNumber.slice(-4);
@@ -19,20 +19,20 @@ const filterBeneficiary = (state, beneficiaryList) => {
     return idMatchRecord;
   }
 
-  const displayNameMatchedBeneficiary = _.find(beneficiaryList, ({ name }) => {
-    const firstName = getFirstName(name);
-    const displayNameEditDistanceScore = getEditDistance(paramsDisplayName, firstName);
-    return displayNameEditDistanceScore < ALLOWED_NAME_EDITS;
-  });
-  if (!_.isEmpty(displayNameMatchedBeneficiary)) {
-    return displayNameMatchedBeneficiary;
-  }
-
-  return _.find(beneficiaryList, (entry) => {
+  const verifiedNameMatchedBeneficiary = _.find(beneficiaryList, (entry) => {
     const { name } = entry;
     const firstName = getFirstName(name);
-    const verifiedNameEditDistanceScore = getEditDistance(paramsVerifiedName, firstName);
-    return verifiedNameEditDistanceScore < ALLOWED_NAME_EDITS;
+    const editDistance = getEditDistance(paramsName, firstName);
+    return editDistance < ALLOWED_NAME_EDITS;
+  });
+  if (!_.isEmpty(verifiedNameMatchedBeneficiary)) {
+    return verifiedNameMatchedBeneficiary;
+  }
+
+  return _.find(beneficiaryList, ({ name }) => {
+    const firstName = getFirstName(name);
+    const editDistanceScore = getEditDistance(paramsDisplayName, firstName);
+    return editDistanceScore < ALLOWED_NAME_EDITS;
   });
 };
 
