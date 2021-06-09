@@ -4,7 +4,8 @@ import { getEditDistance, getFirstName, getCurrentDateString } from '../utils/st
 import { PROCESS_STAGE, API_URLS, ALLOWED_NAME_EDITS, ERROR_CODE, ID_TYPE } from '../constants';
 
 const filterBeneficiary = (state, beneficiaryList) => {
-  const paramsName = getFirstName(state.name);
+  const paramsVerifiedName = getFirstName(state.name);
+  const paramsDisplayName = getFirstName(state.displayName);
   const { id_type: idType, id_number: idNumber='' } = state;
   const maskedIdNumber = idNumber.slice(-4);
 
@@ -21,8 +22,10 @@ const filterBeneficiary = (state, beneficiaryList) => {
   return _.find(beneficiaryList, (entry) => {
     const { name } = entry;
     const firstName = getFirstName(name);
-    const editDistance = getEditDistance(paramsName, firstName);
-    return editDistance < ALLOWED_NAME_EDITS;
+    const verifiedNameEditDistanceScore = getEditDistance(paramsVerifiedName, firstName);
+    const displayNameEditDistanceScore = getEditDistance(paramsDisplayName, firstName);
+    console.log(displayNameEditDistanceScore);
+    return verifiedNameEditDistanceScore < ALLOWED_NAME_EDITS || displayNameEditDistanceScore < ALLOWED_NAME_EDITS;
   });
 };
 

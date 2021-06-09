@@ -139,7 +139,7 @@ function App(props) {
       return;
     }
 
-    setState({ ...state, stage: PROCESS_STAGE.INIT, lastPhone: state.registeredPhone, errorObj: null });
+    setState({ ...state, stage: PROCESS_STAGE.INIT, lastPhone: state.registeredPhone });
   };
 
   const enterAlternatePhoneInitStage = () => {
@@ -156,7 +156,7 @@ function App(props) {
   };
 
   const renderErrorItem = () => {
-    if (_.isEmpty(_.get(state.errorObj, 'message')) || _.get(state, 'errorObj.code') === ERROR_CODE.NO_BENEFICIARY) {
+    if (_.isEmpty(_.get(state.errorObj, 'message')) || _.get(state, 'errorObj.code') === COWIN_ERROR_CODE[ERROR_CODE.NO_BENEFICIARY]) {
       return null;
     }
     return (
@@ -258,7 +258,7 @@ function App(props) {
         setState({...state, stage: PROCESS_STAGE.EXISTING_BOOKING });
         return;
       case COWIN_ERROR_CODE[ERROR_CODE.NO_BENEFICIARY]:
-        setState({ ...state, stage: PROCESS_STAGE.NOT_REGISTERED, errorObj: null });
+        setState({ ...state, stage: PROCESS_STAGE.NOT_REGISTERED });
         return;
       case ERROR_CODE.NO_SLOT:
         handleBookingFailure();
