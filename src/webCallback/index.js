@@ -1,5 +1,5 @@
 import { getUrlParamsFromObj } from '../utils/queryParams';
-import { ERROR_CODE, PROCESS_STAGE } from '../constants';
+import { ERROR_CODE, PROCESS_STAGE, MAX_BENEFICIARY_ALLOWED } from '../constants';
 import * as _ from 'lodash';
 
 export const triggerCallback = (state, callbackDelay=3000) => {
@@ -21,6 +21,7 @@ export const triggerCallback = (state, callbackDelay=3000) => {
 const getCallbackParams = (state) => {
   const { beneficiaryDetails={} } = state;
   const errorObj = getErrorParams(state);
+  const metaData = getMetaDataParams(state);
   const baseState = {
     beneficiary_id: beneficiaryDetails.beneficiary_reference_id,
     name: beneficiaryDetails.name,
@@ -29,7 +30,8 @@ const getCallbackParams = (state) => {
     dose_1_date: beneficiaryDetails.dose1_date,
     dose_2_date: beneficiaryDetails.dose2_date,
     err_code: errorObj.code,
-    err_message: errorObj.message
+    err_message: errorObj.message,
+    metaData: JSON.stringify(metaData)
   };
 
   switch(state.stage) {
@@ -99,3 +101,10 @@ const getVaccineFee = (vaccineSlot = {}) => {
   });
   return _.get(selectedVaccineRate, 'fee', '0');
 };
+
+const getMetaDataParams = (state) => {
+  if (state.stage === PROCESS_STAGE.NOT_REGISTERED) {
+    return { beneficiaryDetails: _.slice(state.beneficiaryDetails, 0, MAX_BENEFICIARY_ALLOWED) };
+  }
+  return {};
+}

@@ -36,6 +36,19 @@ const filterBeneficiary = (state, beneficiaryList) => {
   });
 };
 
+const getBeneficiaryDetailsEntity = (beneficiaryList) => {
+  return _.map(beneficiaryList, (beneficiary) => {
+    return _.omitBy({
+      beneficiaryId: beneficiary.beneficiary_reference_id,
+      name: beneficiary.name,
+      vaccine: beneficiary.vaccine,
+      vaccinationStatus: beneficiary.vaccination_status,
+      dose1Date: beneficiary.dose1_date,
+      dose2Date: beneficiary.dose2_date,
+      }, _.isEmpty);
+  });
+};
+
 export const fetchBenficiaries = async (state, stateCallback) => {
   try {
     const data = await makeGetCall(API_URLS.FETCH_BENEFICIARY, stateCallback, state.token);
@@ -44,7 +57,8 @@ export const fetchBenficiaries = async (state, stateCallback) => {
     if (_.isEmpty(beneficiaryDetails)) {
       stateCallback({
         stage: PROCESS_STAGE.NOT_REGISTERED,
-        registeredBeneficiaryList: _.uniqWith(state.registeredBeneficiaryList.concat(_.map(beneficiaryList, 'name')), _.isEqual)
+        registeredBeneficiaryList: _.uniqWith(state.registeredBeneficiaryList.concat(_.map(beneficiaryList, 'name')), _.isEqual),
+        beneficiaryDetails: getBeneficiaryDetailsEntity(beneficiaryList)
       });
       return;
     }
