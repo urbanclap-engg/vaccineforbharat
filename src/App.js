@@ -156,6 +156,7 @@ function App(props) {
   };
 
   const renderErrorItem = () => {
+    // Check state.stage instead of errorObj.source
     if (_.isEmpty(_.get(state.errorObj, 'message')) || _.get(state, 'errorObj.source') === ERROR_SOURCE.FETCH_BENEFICIARY) {
       return null;
     }
@@ -248,6 +249,7 @@ function App(props) {
     }
 
     switch (state.errorObj.source) {
+      // This should be done in catch-block of fetchBeneficiary
       case ERROR_SOURCE.FETCH_BENEFICIARY:
         setState({ ...state, stage: PROCESS_STAGE.NOT_REGISTERED });
         return;

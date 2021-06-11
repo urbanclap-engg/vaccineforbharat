@@ -59,6 +59,7 @@ export const COWIN_ERROR_CODE = {
   [ERROR_CODE.NO_BENEFICIARY]: 'APPOIN0001'
 };
 
+// Remove... more code = more bugs
 export const ERROR_SOURCE = {
   FETCH_BENEFICIARY: 'fetchBeneficiaries'
 };
