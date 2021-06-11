@@ -59,6 +59,6 @@ export const fetchBenficiaries = async (state, stateCallback) => {
     }
     stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails });
   } catch(err) {
-    // Add code here ....
+
   }
 };

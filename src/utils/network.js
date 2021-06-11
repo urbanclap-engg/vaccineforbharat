@@ -48,8 +48,7 @@ export const makeGetCall = async (path, stateCallback, token) => {
     return data;
   })
   .catch(data => {
-    // Poor coding choice to change a generic function, can backfire
-    stateCallback({ errorObj: {code: data.errorCode, message: data.error, source: ERROR_SOURCE.FETCH_BENEFICIARY }, isLoading: false });
+    stateCallback({ errorObj: {code: data.errorCode, message: data.error }, isLoading: false });
     throw data;
   });
 };

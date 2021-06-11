@@ -59,11 +59,6 @@ export const COWIN_ERROR_CODE = {
   [ERROR_CODE.NO_BENEFICIARY]: 'APPOIN0001'
 };
 
-// Remove... more code = more bugs
-export const ERROR_SOURCE = {
-  FETCH_BENEFICIARY: 'fetchBeneficiaries'
-};
-
 export const OTP_RETRY_TIME = 120;
 
 export const MAX_BOOKING_ATTEMPT = 2;

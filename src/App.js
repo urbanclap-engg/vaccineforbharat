@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { withRouter } from "react-router";
 import * as _ from 'lodash';
 import { SECRET_KEYS, PROCESS_STAGE, API_URLS, ERROR_CODE, COWIN_ERROR_CODE,
-  OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT, INVALID_PHONE_REASONS_TEXT, DEFAULT_AUTO_CALLBACK_STATE, ERROR_SOURCE } from './constants';
+  OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT, INVALID_PHONE_REASONS_TEXT, DEFAULT_AUTO_CALLBACK_STATE } from './constants';
 import Card from '@material-ui/core/Card';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -156,8 +156,7 @@ function App(props) {
   };
 
   const renderErrorItem = () => {
-    // Check state.stage instead of errorObj.source
-    if (_.isEmpty(_.get(state.errorObj, 'message')) || _.get(state, 'errorObj.source') === ERROR_SOURCE.FETCH_BENEFICIARY) {
+    if (_.isEmpty(_.get(state.errorObj, 'message')) || _.get(state, 'stage') === PROCESS_STAGE.NOT_REGISTERED) {
       return null;
     }
     return (
@@ -248,9 +247,8 @@ function App(props) {
       return;
     }
 
-    switch (state.errorObj.source) {
-      // This should be done in catch-block of fetchBeneficiary
-      case ERROR_SOURCE.FETCH_BENEFICIARY:
+    switch (state.stage) {
+      case PROCESS_STAGE.FETCH_BENEFICIARY:
         setState({ ...state, stage: PROCESS_STAGE.NOT_REGISTERED });
         return;
       default: break;
