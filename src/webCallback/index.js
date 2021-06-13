@@ -80,7 +80,7 @@ const getErrorParams = (state) => {
   if (state.stage === PROCESS_STAGE.NOT_REGISTERED) {
     return !_.isEmpty(state.errorObj) ? state.errorObj : {
       code: ERROR_CODE.NO_BENEFICIARY,
-      message: _.join(state.registeredBeneficiaryList, ',')
+      message: _.join(_.map(state.registeredBeneficiaryList, 'name'), ',')
     };
   }
   return state.errorObj || {};
@@ -104,7 +104,7 @@ const getVaccineFee = (vaccineSlot = {}) => {
 
 const getMetaDataParams = (state) => {
   if (state.stage === PROCESS_STAGE.NOT_REGISTERED) {
-    return { beneficiaryDetails: _.slice(state.beneficiaryDetails, 0, MAX_BENEFICIARY_ALLOWED) };
+    return { availableBeneficiaries: _.slice(state.registeredBeneficiaryList, 0, MAX_BENEFICIARY_ALLOWED) };
   }
   return {};
 }

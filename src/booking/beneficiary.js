@@ -57,8 +57,7 @@ export const fetchBenficiaries = async (state, stateCallback) => {
     if (_.isEmpty(beneficiaryDetails)) {
       stateCallback({
         stage: PROCESS_STAGE.NOT_REGISTERED,
-        registeredBeneficiaryList: _.uniqWith(state.registeredBeneficiaryList.concat(_.map(beneficiaryList, 'name')), _.isEqual),
-        beneficiaryDetails: getBeneficiaryDetailsEntity(beneficiaryList)
+        registeredBeneficiaryList: getBeneficiaryDetailsEntity(beneficiaryList)
       });
       return;
     }

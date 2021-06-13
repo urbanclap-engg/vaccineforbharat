@@ -57,7 +57,7 @@ function App(props) {
   const searchParams = getSearchParamsFromUrl(props.location.search);
   const [state, setState] = useState({...searchParams,
     stage: PROCESS_STAGE.INIT, otp: '', captcha: '', registeredPhone: _.get(searchParams, 'phone'),
-    lastPhone: _.get(searchParams, 'phone'), registeredBeneficiaryList: [], beneficiaryDetails: [] });
+    lastPhone: _.get(searchParams, 'phone'), registeredBeneficiaryList: [] });
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
   const [bookingAttempt, setBookingAttempt] = useState(1);
   const [autoCallBackState, setAutoCallBackState] = useState(DEFAULT_AUTO_CALLBACK_STATE);
