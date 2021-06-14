@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
-import { SLOT_CUTOFF_HOUR } from '../constants';
+import * as stringSimilarity from 'string-similarity';
 const MAX_STRING_CHECK = 50;
+const MIN_STRING_SIMILARITY = 0.7;
 
 export const getFirstName = (name) => {
   const lowerName = _.toLower(name);
@@ -63,3 +64,20 @@ export const getSlotDateString = () => {
 export const getMinuteString = (seconds) => {
   return new Date(seconds * 1000).toISOString().substr(14, 5);
 };
+
+export const getStringSimilarityBasedBeneficiary = (beneficiaryList, verifiedName) => {
+  if (_.isEmpty(beneficiaryList)) {
+    return undefined;
+  }
+  const beneficiaryNamesLowerCase = _.map(beneficiaryList, ({ name }) => {
+    return _.toLower(name);
+  });
+  const verifiedNameLowerCase = _.toLower(verifiedName);
+  const bestMatchResults = stringSimilarity.findBestMatch(verifiedNameLowerCase, beneficiaryNamesLowerCase);
+  const { bestMatch={}, bestMatchIndex } = bestMatchResults;
+  const { rating=0 } = bestMatch;
+  if (rating > MIN_STRING_SIMILARITY) {
+    return beneficiaryList[bestMatchIndex];
+  }
+  return undefined;
+}

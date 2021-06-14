@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import { makeGetCall, makePostCall } from '../utils/network';
-import { getEditDistance, getFirstName, getCurrentDateString } from '../utils/stringUtils';
+import { getEditDistance, getFirstName, getCurrentDateString,
+  getStringSimilarityBasedBeneficiary } from '../utils/stringUtils';
 import { PROCESS_STAGE, API_URLS, ALLOWED_NAME_EDITS, ERROR_CODE, ID_TYPE } from '../constants';
 
 const filterBeneficiary = (state, beneficiaryList) => {
@@ -29,11 +30,16 @@ const filterBeneficiary = (state, beneficiaryList) => {
     return verifiedNameMatchedBeneficiary;
   }
 
-  return _.find(beneficiaryList, ({ name }) => {
+  const profileNameMatchedBeneficiary = _.find(beneficiaryList, ({ name }) => {
     const firstName = getFirstName(name);
     const editDistanceScore = getEditDistance(paramsDisplayName, firstName);
     return editDistanceScore < ALLOWED_NAME_EDITS;
   });
+  if (!_.isEmpty(profileNameMatchedBeneficiary)) {
+    return profileNameMatchedBeneficiary;
+  }
+
+  return getStringSimilarityBasedBeneficiary(beneficiaryList, state.name);
 };
 
 const getBeneficiaryDetailsEntity = (beneficiaryList) => {
