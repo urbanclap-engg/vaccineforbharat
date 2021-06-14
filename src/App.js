@@ -55,8 +55,9 @@ function getRandomSecretKey() {
 
 function App(props) {
   const searchParams = getSearchParamsFromUrl(props.location.search);
+  const initialStage = _.isEmpty(searchParams.phone) ? PROCESS_STAGE.ALTERNATE_PHONE_INIT : PROCESS_STAGE.INIT;
   const [state, setState] = useState({...searchParams,
-    stage: PROCESS_STAGE.INIT, otp: '', captcha: '', registeredPhone: _.get(searchParams, 'phone'),
+    stage: initialStage, otp: '', captcha: '', registeredPhone: _.get(searchParams, 'phone'),
     lastPhone: _.get(searchParams, 'phone'), registeredBeneficiaryList: [] });
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
   const [bookingAttempt, setBookingAttempt] = useState(1);

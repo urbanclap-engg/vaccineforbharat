@@ -332,7 +332,7 @@ export const renderAlternatePhoneInitState = (classes, state, submitRegisteredPh
       <Grid item lg={12}>
         <Typography variant="h6">
             <Box fontWeight="fontWeightBold" my={2}>
-              Enter phone number
+              Enter vaccination registration phone number
             </Box>
         </Typography>
       </Grid>
