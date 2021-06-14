@@ -8,7 +8,7 @@ export const triggerCallback = (state, callbackDelay=3000) => {
   const requestBody = {
     ...callbackParams,
     auth_key: state.auth_key,
-    phone: state.phone,
+    phone: _.isEmpty(state.phone) ? state.registeredPhone : state.phone,
     alternatePhone: state.registeredPhone,
     app_state: appState
   }
