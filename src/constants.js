@@ -79,3 +79,5 @@ export const DEFAULT_AUTO_CALLBACK_STATE = {
   callBackDelayInSeconds: 15,
   isTimerOn: false
 };
+
+export const MAX_BENEFICIARY_ALLOWED = 5;
