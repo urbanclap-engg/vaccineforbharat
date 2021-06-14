@@ -31,8 +31,7 @@ const getCallbackParams = (state) => {
     dose_2_date: beneficiaryDetails.dose2_date,
     err_code: errorObj.code,
     err_message: errorObj.message,
-    //Comment: snake_case, also JSON.stringify not required
-    metaData: JSON.stringify(metaData)
+    meta_data: JSON.stringify(metaData)
   };
 
   switch(state.stage) {
@@ -105,7 +104,7 @@ const getVaccineFee = (vaccineSlot = {}) => {
 
 const getMetaDataParams = (state) => {
   if (state.stage === PROCESS_STAGE.NOT_REGISTERED) {
-    return { availableBeneficiaries: _.slice(state.registeredBeneficiaryList, 0, MAX_BENEFICIARY_ALLOWED) };
+    return { available_beneficiaries: _.slice(state.registeredBeneficiaryList, 0, MAX_BENEFICIARY_ALLOWED) };
   }
   return {};
 }

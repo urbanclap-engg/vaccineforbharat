@@ -37,17 +37,15 @@ const filterBeneficiary = (state, beneficiaryList) => {
 };
 
 const getBeneficiaryDetailsEntity = (beneficiaryList) => {
-  // Comment: Keys in buildForBharat payload are all snake_case. Transformation needs to be done at BE service level.
   return _.map(beneficiaryList, (beneficiary) => {
-    // Comment: Send it raw, omitting not required
-    return _.omitBy({
-      beneficiaryId: beneficiary.beneficiary_reference_id,
+    return {
+      beneficiary_id: beneficiary.beneficiary_reference_id,
       name: beneficiary.name,
       vaccine: beneficiary.vaccine,
-      vaccinationStatus: beneficiary.vaccination_status,
-      dose1Date: beneficiary.dose1_date,
-      dose2Date: beneficiary.dose2_date,
-      }, _.isEmpty);
+      vaccination_status: beneficiary.vaccination_status,
+      dose1_date: beneficiary.dose1_date,
+      dose2_date: beneficiary.dose2_date,
+      };
   });
 };
 
