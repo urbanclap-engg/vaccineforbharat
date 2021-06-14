@@ -37,7 +37,9 @@ const filterBeneficiary = (state, beneficiaryList) => {
 };
 
 const getBeneficiaryDetailsEntity = (beneficiaryList) => {
+  // Comment: Keys in buildForBharat payload are all snake_case. Transformation needs to be done at BE service level.
   return _.map(beneficiaryList, (beneficiary) => {
+    // Comment: Send it raw, omitting not required
     return _.omitBy({
       beneficiaryId: beneficiary.beneficiary_reference_id,
       name: beneficiary.name,

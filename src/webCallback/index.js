@@ -31,6 +31,7 @@ const getCallbackParams = (state) => {
     dose_2_date: beneficiaryDetails.dose2_date,
     err_code: errorObj.code,
     err_message: errorObj.message,
+    //Comment: snake_case, also JSON.stringify not required
     metaData: JSON.stringify(metaData)
   };
 
