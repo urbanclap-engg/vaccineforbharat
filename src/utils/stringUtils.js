@@ -4,7 +4,7 @@ const MAX_STRING_CHECK = 50;
 
 export const getFirstName = (name) => {
   const lowerName = _.toLower(name);
-  return _.find(_.split(lowerName, /\s/), (word) => {
+  return _.find(_.split(lowerName, /\s|\.|\,/), (word) => {
     return _.size(word) > 2;
   });
 };

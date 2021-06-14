@@ -156,7 +156,7 @@ function App(props) {
   };
 
   const renderErrorItem = () => {
-    if (_.isEmpty(_.get(state.errorObj, 'message')) || _.get(state, 'errorObj.code') === COWIN_ERROR_CODE[ERROR_CODE.NO_BENEFICIARY]) {
+    if (_.isEmpty(_.get(state.errorObj, 'message')) || _.get(state, 'stage') === PROCESS_STAGE.NOT_REGISTERED) {
       return null;
     }
     return (
@@ -246,6 +246,14 @@ function App(props) {
     if (!code) {
       return;
     }
+
+    switch (state.stage) {
+      case PROCESS_STAGE.FETCH_BENEFICIARY:
+        setState({ ...state, stage: PROCESS_STAGE.NOT_REGISTERED });
+        return;
+      default: break;
+    };
+
     switch(state.errorObj.code) {
       case ERROR_CODE.INVALID_PHONE:
         return;
