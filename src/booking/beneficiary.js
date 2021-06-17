@@ -10,6 +10,11 @@ const filterBeneficiary = (state, beneficiaryList) => {
   const { id_type: idType, id_number: idNumber='' } = state;
   const maskedIdNumber = idNumber.slice(-4);
 
+  const matchedBeneficiaryRecord = _.find(beneficiaryList, { beneficiary_reference_id: state.beneficiaryId });
+  if (!_.isEmpty(matchedBeneficiaryRecord)) {
+    return matchedBeneficiaryRecord;
+  }
+
   const idMatchRecord = _.find(beneficiaryList, (entry) => {
     const entryIdType = ID_TYPE[entry.photo_id_type];
     const entryIdNumber = _.get(entry, 'photo_id_number', '').slice(-4);
