@@ -183,13 +183,15 @@ function App(props) {
       case PROCESS_STAGE.VACCINATED:
         return renderVaccinatedStage(classes);  
       case PROCESS_STAGE.EXISTING_BOOKING:
-        return renderExistingBookingStage(classes);    
+        return renderExistingBookingStage({ classes, enterAlternatePhoneInitStage,
+          goToHome, autoCallBackState });
       case PROCESS_STAGE.BOOKING_FAILED:
         return renderBookingFailedStage(state, bookingAttempt, classes);
       case PROCESS_STAGE.ERROR:
         return renderErrorStage(state, classes);
       case PROCESS_STAGE.REGISTERED:
-        return renderRegisteredStage(classes);
+        return renderRegisteredStage({ classes, registeredPhone: state.registeredPhone,
+          enterAlternatePhoneInitStage, goToHome, autoCallBackState });
       case PROCESS_STAGE.NOT_REGISTERED:
         return renderNotRegiseteredState({ classes, registeredPhone: state.registeredPhone, 
           enterAlternatePhoneInitStage, goToHome, autoCallBackState });
@@ -228,12 +230,12 @@ function App(props) {
         break;
       case PROCESS_STAGE.SLOT_BOOKED:
       case PROCESS_STAGE.VACCINATED:
-      case PROCESS_STAGE.EXISTING_BOOKING:
-      case PROCESS_STAGE.REGISTERED:
       case PROCESS_STAGE.ERROR:
         triggerCallback(state);
         break;
       case PROCESS_STAGE.NOT_REGISTERED:
+      case PROCESS_STAGE.REGISTERED:
+      case PROCESS_STAGE.EXISTING_BOOKING:
         setAutoCallBackState({ ...DEFAULT_AUTO_CALLBACK_STATE, isTimerOn: true });
         return;
       default:

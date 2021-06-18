@@ -26,6 +26,31 @@ const getRetryElement = (classes) => {
   </div>)
 };
 
+const getAlternateNumberElement = (classes, enterAlternatePhoneInitStage, goToHome) => {
+  return (<div>
+    <Grid container justify="center" alignItems="center" direction="column">
+      <Button className={classes.button}
+        variant="contained"
+        color="primary"
+        fullWidth={true}
+        onClick={enterAlternatePhoneInitStage}>
+          <Typography variant="subtitle2">
+            Vaccinated on different number?
+          </Typography>
+      </Button>
+      <Button className={classes.goHomeButton}
+        variant="outlined"
+        color="primary"
+        fullWidth={true}
+        onClick={goToHome}>
+          <Typography variant="subtitle2">
+            Go to home
+          </Typography>
+      </Button>
+    </Grid>
+  </div>);
+};
+
 export const renderOtpStage = (params) => {
   const { state, retryTime, classes, changeOtp, submitOtp, triggerOtp, enterAlternatePhoneInitStage } = params;
   const retryEnabled = (retryTime < 1);
@@ -165,8 +190,10 @@ export const renderVaccinatedStage = (classes) => {
   )
 };
 
-export const renderExistingBookingStage = (classes) => {
-  return (
+export const renderExistingBookingStage = ({ classes, enterAlternatePhoneInitStage,
+  goToHome, autoCallBackState }) => {
+    const alternateNumberElement = getAlternateNumberElement(classes, enterAlternatePhoneInitStage, goToHome);
+    return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
         <Typography variant="body2">
@@ -183,8 +210,12 @@ export const renderExistingBookingStage = (classes) => {
         </Typography>
       </Grid>
       <Grid item lg={12}>
-        {getRedirectElement(classes)}
+        {autoCallBackState.isTimerOn &&
+          <Typography>
+            ⌛ Taking you back in {autoCallBackState.callBackDelayInSeconds}
+          </Typography>}
       </Grid>
+      {alternateNumberElement}
     </Grid>
   )
 };
@@ -253,7 +284,9 @@ export const renderErrorStage = (state, classes) => {
   )
 };
 
-export const renderRegisteredStage = (classes) => {
+export const renderRegisteredStage = ({ classes, enterAlternatePhoneInitStage,
+  goToHome, autoCallBackState }) => {
+  const alternateNumberElement = getAlternateNumberElement(classes, enterAlternatePhoneInitStage, goToHome);
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
@@ -271,14 +304,19 @@ export const renderRegisteredStage = (classes) => {
         </Typography>
       </Grid>
       <Grid item lg={12}>
-        {getRedirectElement(classes)}
+        {autoCallBackState.isTimerOn &&
+          <Typography>
+            ⌛ Taking you back in {autoCallBackState.callBackDelayInSeconds}
+          </Typography>}
       </Grid>
+      {alternateNumberElement}
     </Grid>
   )
 };
 
 export const renderNotRegiseteredState = (params) => {
   const { classes, registeredPhone, enterAlternatePhoneInitStage, goToHome, autoCallBackState } = params;
+  const alternateNumberElement = getAlternateNumberElement(classes, enterAlternatePhoneInitStage, goToHome);
   return (
     <Grid alignItems="center" justify="center">
       <Grid item lg={12}>
@@ -300,28 +338,7 @@ export const renderNotRegiseteredState = (params) => {
             </Box>
         </Typography>
       </Grid>
-      <Grid container justify="center" alignItems="center" direction="column">
-        <Button className={classes.button}
-          variant="contained"
-          color="primary"
-          //size="large"
-          fullWidth={true}
-          onClick={enterAlternatePhoneInitStage}>
-            <Typography variant="subtitle2">
-              Vaccine registered on different number?
-            </Typography>
-        </Button>
-        <Button className={classes.goHomeButton}
-          variant="contained"
-          color="primary"
-          //size="small"
-          fullWidth={true}
-          onClick={goToHome}>
-            <Typography variant="subtitle2">
-              Go to home
-            </Typography>
-        </Button>
-      </Grid>
+      {alternateNumberElement}
     </Grid>
   )
 };
