@@ -16,7 +16,8 @@ import { triggerCallback } from './webCallback';
 import Image from './assests/build4bharat.jpg';
 import Box from '@material-ui/core/Box';
 import { renderOtpStage, renderCaptchStage, renderSuccessStage, renderExistingBookingStage,
-renderBookingFailedStage, renderVaccinatedStage, renderErrorStage, renderRegisteredStage, renderNotRegiseteredState, renderAlternatePhoneInitState } from './stateView';
+  renderBookingFailedStage, renderVaccinatedStage, renderErrorStage, renderRegisteredStage,
+  renderNotRegiseteredState, renderAlternatePhoneInitState, renderPhoneNumberConfirmation } from './stateView';
 const shajs = require('sha.js');
 
 const useStyles = makeStyles({
@@ -38,7 +39,8 @@ const useStyles = makeStyles({
     bottom: 0
   },
   button: {
-    marginTop: 10
+    marginTop: 10,
+    borderRadius: 12
   },
   goHomeButton: {
     marginTop: 20
@@ -57,7 +59,7 @@ function App(props) {
   const searchParams = getSearchParamsFromUrl(props.location.search);
   const initialStage = _.isEmpty(searchParams.phone) ? PROCESS_STAGE.ALTERNATE_PHONE_INIT : PROCESS_STAGE.INIT;
   const [state, setState] = useState({...searchParams,
-    stage: initialStage, otp: '', captcha: '', registeredPhone: _.get(searchParams, 'phone'),
+    stage: initialStage, otp: '', registeredPhone: _.get(searchParams, 'phone'),
     lastPhone: _.get(searchParams, 'phone'), registeredBeneficiaryList: [] });
   const [retryTime, setRetryTime] = useState(OTP_RETRY_TIME);
   const [bookingAttempt, setBookingAttempt] = useState(1);
@@ -69,9 +71,7 @@ function App(props) {
   const changeOtp = (otp) => {
     setState({...state, otp});
   };
-  const changeCaptcha = (captcha) => {
-    setState({...state, captcha});
-  };
+
   const triggerOtp = async () => {
     const secretKey = getRandomSecretKey();
     setRetryTime(OTP_RETRY_TIME);
@@ -96,10 +96,10 @@ function App(props) {
     } catch(err) {
     }
   };
-  const submitCaptcha = async () => {
+
+  const scheduleSlot = async () => {
     try {
       const data = await makePostCall(API_URLS.SCHEDULE, {
-        "captcha": state.captcha,
         "beneficiaries": [state.beneficiaryDetails.beneficiary_reference_id],
         "center_id": state.vaccineSlot.center_id,
         "slot": state.vaccineSlot.slot_time,
@@ -113,16 +113,6 @@ function App(props) {
         setState({...state, errorObj:{ code: ERROR_CODE.BOOKING_FAILED, message: 'Appointment not confirmed' } })
       }
     } catch(err) {
-    }
-  };
-  const triggerCaptcha = async () => {
-    try {
-      const data = await makePostCall(API_URLS.TRIGGER_CAPTCHA, {},
-      stateCallback, state.token);
-      const svg = _.get(data, 'captcha');
-      setState({...state, stage: PROCESS_STAGE.SCHEDULE, svg })
-    } catch(err) {
-
     }
   };
 
@@ -152,6 +142,12 @@ function App(props) {
     });
   };
 
+  const confirmRegisteredPhone = () => {
+    setState({ ...state,
+      stage: PROCESS_STAGE.CONFIRM_PHONE
+    });
+  }
+
   const goToHome = () => {
     triggerCallback(state, 0);
   };
@@ -174,10 +170,6 @@ function App(props) {
   };
   const getRenderView = (classes) => {
       switch(state.stage) {
-      case PROCESS_STAGE.FETCH_SLOTS:
-        return renderCaptchStage(state, classes, changeCaptcha, submitCaptcha);
-      case PROCESS_STAGE.SCHEDULE:
-        return renderCaptchStage(state, classes, changeCaptcha, submitCaptcha);
       case PROCESS_STAGE.SLOT_BOOKED:
         return renderSuccessStage(classes);
       case PROCESS_STAGE.VACCINATED:
@@ -196,7 +188,9 @@ function App(props) {
         return renderNotRegiseteredState({ classes, registeredPhone: state.registeredPhone, 
           enterAlternatePhoneInitStage, goToHome, autoCallBackState });
       case PROCESS_STAGE.ALTERNATE_PHONE_INIT:
-        return renderAlternatePhoneInitState(classes, state, submitRegisteredPhone, changeRegisteredPhone);
+        return renderAlternatePhoneInitState(classes, state, submitRegisteredPhone, changeRegisteredPhone, confirmRegisteredPhone);
+      case PROCESS_STAGE.CONFIRM_PHONE:
+        return renderPhoneNumberConfirmation(classes, state, submitRegisteredPhone, enterAlternatePhoneInitStage);
       default:
         return renderOtpStage({state, retryTime, classes, changeOtp, submitOtp, triggerOtp, enterAlternatePhoneInitStage});
     }
@@ -219,15 +213,14 @@ function App(props) {
           triggerOtp();
         }
         break;
-      case PROCESS_STAGE.TRIGGER_CAPTCHA:
-        triggerCaptcha();
-        break;
       case PROCESS_STAGE.FETCH_BENEFICIARY:
         fetchBenficiaries(state, stateCallback);
         break;
       case PROCESS_STAGE.FETCH_SLOTS:
         fetchSlots(state, stateCallback);
         break;
+      case PROCESS_STAGE.SCHEDULE:
+        scheduleSlot(state, stateCallback);
       case PROCESS_STAGE.SLOT_BOOKED:
       case PROCESS_STAGE.VACCINATED:
       case PROCESS_STAGE.ERROR:
@@ -262,9 +255,6 @@ function App(props) {
         return;
       case COWIN_ERROR_CODE[ERROR_CODE.INVALID_OTP]:
         return;
-      case COWIN_ERROR_CODE[ERROR_CODE.INVALID_CAPTCHA]:
-        triggerCaptcha();
-        return;  
       case COWIN_ERROR_CODE[ERROR_CODE.EXISTING_BOOKING]:
         setState({...state, stage: PROCESS_STAGE.EXISTING_BOOKING });
         return;

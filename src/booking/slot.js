@@ -57,7 +57,7 @@ export const fetchSlots = async(state, stateCallback) => {
       stateCallback({errorObj: { code: ERROR_CODE.NO_SLOT, message: `No available slot found for district ${district}`} })
       return;
     }
-    stateCallback({ stage: PROCESS_STAGE.TRIGGER_CAPTCHA, vaccineSlot })
+    stateCallback({ stage: PROCESS_STAGE.SCHEDULE, vaccineSlot })
   } catch(err) {
 
   }

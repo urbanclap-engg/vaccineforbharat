@@ -13,7 +13,6 @@ export const PROCESS_STAGE = {
   VALIDATE_OTP: 'VALIDATE_OTP',
   FETCH_BENEFICIARY: 'FETCH_BENEFICIARY',
   FETCH_SLOTS: 'FETCH_SLOTS',
-  TRIGGER_CAPTCHA: 'TRIGGER_CAPTCHA',
   SCHEDULE: 'SCHEDULE',
   SLOT_BOOKED: 'SLOT_BOOKED',
   ERROR: 'ERROR',
@@ -22,14 +21,14 @@ export const PROCESS_STAGE = {
   VACCINATED: 'VACCINATED',
   REGISTERED: 'REGISTERED',
   NOT_REGISTERED: 'NOT_REGISTERED',
-  ALTERNATE_PHONE_INIT: 'ALTERNATE_PHONE_INIT'
+  ALTERNATE_PHONE_INIT: 'ALTERNATE_PHONE_INIT',
+  CONFIRM_PHONE: 'CONFIRM_PHONE'
 };
 
 export const API_URLS = {
   [PROCESS_STAGE.INIT]: 'https://cdn-api.co-vin.in/api/v2/auth/generateMobileOTP',
   [PROCESS_STAGE.VALIDATE_OTP]: 'https://cdn-api.co-vin.in/api/v2/auth/validateMobileOtp',
   [PROCESS_STAGE.FETCH_BENEFICIARY]: 'https://cdn-api.co-vin.in/api/v2/appointment/beneficiaries',
-  [PROCESS_STAGE.TRIGGER_CAPTCHA]: 'https://cdn-api.co-vin.in/api/v2/auth/getRecaptcha',
   [PROCESS_STAGE.SCHEDULE]: 'https://cdn-api.co-vin.in/api/v2/appointment/schedule',
   [PROCESS_STAGE.FETCH_SLOTS]: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByDistrict'
 };
@@ -45,7 +44,6 @@ export const ERROR_CODE = {
   NO_BENEFICIARY: 'NO_BENEFICIARY',
   NO_SLOT: 'NO_SLOT',
   INVALID_OTP: 'INVALID_OTP',
-  INVALID_CAPTCHA: 'INVALID_CAPTCHA',
   EXISTING_BOOKING: 'EXISTING_BOOKING',
   BOOKING_FAILED: 'BOOKING_FAILED',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
@@ -55,7 +53,6 @@ export const ERROR_CODE = {
 export const COWIN_ERROR_CODE = {
   [ERROR_CODE.EXISTING_BOOKING]: 'APPOIN0022',
   [ERROR_CODE.INVALID_OTP]: 'USRAUT0014',
-  [ERROR_CODE.INVALID_CAPTCHA]: 'APPOIN0045',
   [ERROR_CODE.NO_BENEFICIARY]: 'APPOIN0001'
 };
 

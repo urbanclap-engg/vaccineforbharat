@@ -1,6 +1,7 @@
 import React from 'react';
 import * as _ from 'lodash';
 import { OTP_RETRY_TIME, MAX_BOOKING_ATTEMPT, ERROR_CODE, COWIN_ERROR_CODE, PROCESS_STAGE } from '../constants';
+import {ReactComponent as QuestionIcon} from "../assests/questionMark.svg";
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -9,6 +10,7 @@ import Link from '@material-ui/core/Link';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMinuteString } from '../utils/stringUtils';
 import Box from '@material-ui/core/Box';
+import SvgIcon from "@material-ui/core/SvgIcon";
 
 const getRedirectElement = (classes) => {
   return (<div className={classes.body}>
@@ -101,44 +103,6 @@ export const renderOtpStage = (params) => {
         </Grid>
       </Grid>
     </Grid>
-  )
-};
-
-export const renderCaptchStage = (state, classes, changeCaptcha, submitCaptcha) => {
-  if (!state.svg) {
-    return undefined;
-  }
-  const buff = new Buffer(state.svg);
-  const base64data = buff.toString('base64');
-  return (
-    <Grid alignItems="center" justify="center">
-      <Grid item lg={12}>
-        <Typography variant="body2">
-          <Box fontWeight="fontWeightBold">
-            Book Slot
-          </Box>
-        </Typography>
-      </Grid>
-      <Grid item lg={12}>
-        <Typography variant="h6">
-        <Box fontWeight="fontWeightBold">
-          Enter the characters you see in the image
-        </Box>
-      </Typography>
-    </Grid>
-    <Grid item lg={12}>
-      <img src={`data:image/svg+xml;base64,${base64data}`} />
-    </Grid>
-    <Grid item lg={12}>
-      <TextField maxLength={6} id="captcha" variant="outlined" type="text" maxLength={6} name="Enter Captcha" value={state.captcha} onChange={e => changeCaptcha(e.target.value)} />
-    </Grid>
-    <Grid item lg={12}>
-      <Button className={classes.button} id="captcha" onClick={submitCaptcha} variant="contained" color="primary"
-        disabled={state.isLoading}>
-        Book Vaccination
-      </Button>
-    </Grid>
-  </Grid>
   )
 };
 
@@ -343,13 +307,13 @@ export const renderNotRegiseteredState = (params) => {
   )
 };
 
-export const renderAlternatePhoneInitState = (classes, state, submitRegisteredPhone, changeRegisteredPhone) => {
+export const renderAlternatePhoneInitState = (classes, state, submitRegisteredPhone, changeRegisteredPhone, confirmRegisteredPhone) => {
   return (
     <Grid alignItems="center" justify="center" direction="column">
       <Grid item lg={12}>
         <Typography variant="h6">
             <Box fontWeight="fontWeightBold" my={2}>
-              Enter vaccination registration phone number
+              Enter phone number used for Vaccination
             </Box>
         </Typography>
       </Grid>
@@ -360,7 +324,7 @@ export const renderAlternatePhoneInitState = (classes, state, submitRegisteredPh
           size="small"
           type="number"
           id="alternatePhone"
-          label="Phone number"
+          label="Vaccination Phone Number"
           variant="outlined"
           value={state.registeredPhone}
           onChange={e => changeRegisteredPhone(e.target.value)}
@@ -371,12 +335,55 @@ export const renderAlternatePhoneInitState = (classes, state, submitRegisteredPh
           variant="contained"
           color="primary"
           fullWidth={true}
-          id="submitRegisteredPhone"
-          onClick={submitRegisteredPhone}>
+          id="confirmRegisteredPhone"
+          onClick={confirmRegisteredPhone}>
           <Typography variant="subtitle1">
               Send OTP
           </Typography>
         </Button>
+      </Grid>
+    </Grid>
+  )
+};
+
+export const renderPhoneNumberConfirmation = (classes, state, submitRegisteredPhone, enterAlternatePhoneInitStage) => {
+  return (
+    <Grid container alignItems="center" justify="center" direction="column">
+      <Grid item lg={12} justify="center">
+        <SvgIcon component={QuestionIcon} overflow="visible" />
+      </Grid>
+      <Grid item lg={12}>
+        <Typography variant="h6">
+          <Box fontWeight="fontWeightBold" my={2}>
+            Are you sure you used {state.registeredPhone} for Vaccination?
+          </Box>
+        </Typography>
+      </Grid>
+      <Grid container direction="row" justify="space-between" spacing={1}>
+        <Grid item xs={6}>
+          <Button className={classes.button}
+            variant="outlined"
+            color="primary"
+            fullWidth={true}
+            id="submitRegisteredPhone"
+            onClick={submitRegisteredPhone}>
+            <Typography variant="subtitle2">
+              Yes
+            </Typography>
+          </Button>
+        </Grid>
+        <Grid item xs={6}>
+          <Button className={classes.button}
+            variant="outlined"
+            color="primary"
+            fullWidth={true}
+            id="declineRegisteredPhone"
+            onClick={enterAlternatePhoneInitStage}>
+            <Typography variant="subtitle2">
+              No
+            </Typography>
+          </Button>
+        </Grid>
       </Grid>
     </Grid>
   )
