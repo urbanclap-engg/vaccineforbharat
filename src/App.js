@@ -221,6 +221,7 @@ function App(props) {
         break;
       case PROCESS_STAGE.SCHEDULE:
         scheduleSlot(state, stateCallback);
+        break;
       case PROCESS_STAGE.SLOT_BOOKED:
       case PROCESS_STAGE.VACCINATED:
       case PROCESS_STAGE.ERROR:
