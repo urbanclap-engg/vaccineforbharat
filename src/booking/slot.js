@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { makeGetCall, makePostCall } from '../utils/network';
 import { getCurrentDateString, getSlotDateString } from '../utils/stringUtils';
-import { PROCESS_STAGE, API_URLS, SLOT_FILTER, ERROR_CODE } from '../constants';
+import { PROCESS_STAGE, API_URLS, SLOT_FILTER, ERROR_CODE, FREE_SLOT_THRESHOLD, VACCINE_TYPE } from '../constants';
 
 const getTargetSlotTime = (availableSession) => {
   const slotDate = availableSession.date;
@@ -11,6 +11,17 @@ const getTargetSlotTime = (availableSession) => {
     return availableSession.slots[0];
   }
   return _.last(availableSession.slots);
+};
+
+const getPrioritisedSlot = (availableSlots) => {
+  const freeSlotsAboveThreshold = _.filter(availableSlots, (slots) => {
+    return _.get(slots, 'fee_type') == VACCINE_TYPE.FREE
+      && _.get(slots, 'available_capacity_dose1') >= FREE_SLOT_THRESHOLD;
+  });
+  if(!_.isEmpty(freeSlotsAboveThreshold)) {
+    return _.maxBy(freeSlotsAboveThreshold, 'available_capacity_dose1');
+  }
+  return _.maxBy(availableSlots, 'available_capacity_dose1');
 };
 
 const getAvailableVaccineSlot = (state, centerList) => {
@@ -25,6 +36,7 @@ const getAvailableVaccineSlot = (state, centerList) => {
       return centerAvailability > 0 && dose1Availability >= SLOT_FILTER.MIN_CAPACITY &&
         session.min_age_limit === SLOT_FILTER.MIN_AGE && session.session_id !== lastAttemptedSession;
     });
+
     const maxAvailabilitySession = _.maxBy(availableSessions, 'available_capacity_dose1');
 
     if (maxAvailabilitySession) {
@@ -36,9 +48,8 @@ const getAvailableVaccineSlot = (state, centerList) => {
       });
     }
   });
-  const selectedSlot = _.maxBy(availableSlots, 'available_capacity_dose1');
 
-  return selectedSlot;
+  return getPrioritisedSlot(availableSlots);
 };
 
 export const fetchSlots = async(state, stateCallback) => {

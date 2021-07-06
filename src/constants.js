@@ -65,6 +65,13 @@ export const ID_TYPE = {
   'PAN Card': 'pan_card'
 };
 
+export const VACCINE_TYPE = {
+  FREE: 'Free',
+  PAID: 'Paid'
+}
+
+export const FREE_SLOT_THRESHOLD = 30;
+
 export const SLOT_CUTOFF_HOUR = 15;
 
 export const INVALID_PHONE_REASONS_TEXT = {
