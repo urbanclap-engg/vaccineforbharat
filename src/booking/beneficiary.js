@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import moment from 'moment';
 import { makeGetCall, makePostCall } from '../utils/network';
 import { getEditDistance, getFirstName, getCurrentDateString,
   getStringSimilarityBasedBeneficiary } from '../utils/stringUtils';
@@ -78,6 +79,14 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       return;
     }
     if (!_.isEmpty(beneficiaryDetails.appointments)) {
+      // Check if a reschedule is needed - if appointment is more than a day old.
+      const appointmentId = _.get(beneficiaryDetails.appointments, 'appointment_id', '');
+      const slotDate = _.get(beneficiaryDetails.appointments, 'date', '');
+      if(!_.isEmpty(appointmentId)
+        && !_.isEmpty(slotDate)
+        && moment.utc().diff(moment.utc(slotDate, 'DD-MM-YYYY'), 'days') >= 2) {
+        stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, appointmentId});
+      }
       stateCallback({stage: PROCESS_STAGE.EXISTING_BOOKING, beneficiaryDetails });
       return;
     }

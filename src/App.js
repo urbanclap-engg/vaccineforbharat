@@ -97,7 +97,26 @@ function App(props) {
     }
   };
 
+  const rescheduleSlot = async (appointmentId) => {
+    try {
+      // API returns 204 on success.
+      await makePostCall(API_URLS.RESCHEDULE, {
+        "appointment_id": appointmentId,
+        "session_id": state.vaccineSlot.session_id,
+        "slot": state.vaccineSlot.slot_time
+      }, stateCallback, state.token);
+    } catch (err) {
+
+    }
+  };
+
   const scheduleSlot = async () => {
+    const appointmentId = _.get(state, 'appointmentId', '');
+    if(!_.isEmpty(appointmentId)) {
+      await rescheduleSlot(appointmentId);
+      return;
+    }
+
     try {
       const data = await makePostCall(API_URLS.SCHEDULE, {
         "beneficiaries": [state.beneficiaryDetails.beneficiary_reference_id],
