@@ -79,9 +79,13 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       return;
     }
     if (!_.isEmpty(beneficiaryDetails.appointments)) {
+      // Comment
+      // appointments is a list, appointmentId is extracted wrongly
       // Check if a reschedule is needed - if appointment is more than a day old.
       const appointmentId = _.get(beneficiaryDetails.appointments, 'appointment_id', '');
       const slotDate = _.get(beneficiaryDetails.appointments, 'date', '');
+      // Comment
+      // this can be a function to checkIdAppointmentExpired
       if(!_.isEmpty(appointmentId)
         && !_.isEmpty(slotDate)
         && moment.utc().diff(moment.utc(slotDate, 'DD-MM-YYYY'), 'days') >= 2) {

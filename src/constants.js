@@ -23,6 +23,8 @@ export const PROCESS_STAGE = {
   NOT_REGISTERED: 'NOT_REGISTERED',
   ALTERNATE_PHONE_INIT: 'ALTERNATE_PHONE_INIT',
   CONFIRM_PHONE: 'CONFIRM_PHONE',
+  // Comment
+  // I don't see this state used anywhere in the code
   RESCHEDULE: 'RESCHEDULE'
 };
 
