@@ -22,10 +22,7 @@ export const PROCESS_STAGE = {
   REGISTERED: 'REGISTERED',
   NOT_REGISTERED: 'NOT_REGISTERED',
   ALTERNATE_PHONE_INIT: 'ALTERNATE_PHONE_INIT',
-  CONFIRM_PHONE: 'CONFIRM_PHONE',
-  // Comment
-  // I don't see this state used anywhere in the code
-  RESCHEDULE: 'RESCHEDULE'
+  CONFIRM_PHONE: 'CONFIRM_PHONE'
 };
 
 export const API_URLS = {
@@ -34,7 +31,7 @@ export const API_URLS = {
   [PROCESS_STAGE.FETCH_BENEFICIARY]: 'https://cdn-api.co-vin.in/api/v2/appointment/beneficiaries',
   [PROCESS_STAGE.SCHEDULE]: 'https://cdn-api.co-vin.in/api/v2/appointment/schedule',
   [PROCESS_STAGE.FETCH_SLOTS]: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByDistrict',
-  [PROCESS_STAGE.RESCHEDULE]: 'https://cdn-api.co-vin.in/api/v2/appointment/reschedule',
+  'RESCHEDULE': 'https://cdn-api.co-vin.in/api/v2/appointment/reschedule',
 };
 
 export const ALLOWED_NAME_EDITS = 3;
