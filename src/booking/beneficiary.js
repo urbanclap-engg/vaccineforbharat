@@ -61,6 +61,12 @@ const getBeneficiaryDetailsEntity = (beneficiaryList) => {
   });
 };
 
+const checkIfAppointmentExpired = (appointmentId, slotDate) => {
+  return !_.isEmpty(appointmentId)
+  && !_.isEmpty(slotDate)
+  && moment.utc().diff(moment.utc(slotDate, 'DD-MM-YYYY'), 'days') >= 2;
+};
+
 export const fetchBenficiaries = async (state, stateCallback) => {
   try {
     const data = await makeGetCall(API_URLS.FETCH_BENEFICIARY, stateCallback, state.token);
@@ -79,17 +85,14 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       return;
     }
     if (!_.isEmpty(beneficiaryDetails.appointments)) {
-      // Comment
-      // appointments is a list, appointmentId is extracted wrongly
       // Check if a reschedule is needed - if appointment is more than a day old.
-      const appointmentId = _.get(beneficiaryDetails.appointments, 'appointment_id', '');
-      const slotDate = _.get(beneficiaryDetails.appointments, 'date', '');
-      // Comment
-      // this can be a function to checkIdAppointmentExpired
-      if(!_.isEmpty(appointmentId)
-        && !_.isEmpty(slotDate)
-        && moment.utc().diff(moment.utc(slotDate, 'DD-MM-YYYY'), 'days') >= 2) {
+      const latestAppointment = _.maxBy(beneficiaryDetails.appointments, 'date');
+      const appointmentId = _.get(latestAppointment, 'appointment_id', '');
+      const slotDate = _.get(latestAppointment, 'date', '');
+
+      if(checkIfAppointmentExpired(appointmentId, slotDate)) {
         stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, appointmentId});
+        return;
       }
       stateCallback({stage: PROCESS_STAGE.EXISTING_BOOKING, beneficiaryDetails });
       return;
