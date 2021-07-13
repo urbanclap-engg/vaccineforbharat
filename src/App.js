@@ -105,8 +105,9 @@ function App(props) {
         "session_id": state.vaccineSlot.session_id,
         "slot": state.vaccineSlot.slot_time
       }, stateCallback, state.token);
+      setState({...state, errorObj:{}, stage: PROCESS_STAGE.SLOT_BOOKED, appointmentId });
     } catch (err) {
-
+      setState({...state, errorObj:{ code: ERROR_CODE.BOOKING_FAILED, message: 'Appointment not confirmed' } });
     }
   };
 
