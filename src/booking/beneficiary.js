@@ -45,6 +45,8 @@ const filterBeneficiary = (state, beneficiaryList) => {
     const editDistanceScore = getEditDistance(paramsDisplayName, firstName);
     return editDistanceScore < ALLOWED_NAME_EDITS;
   });
+  // Comment
+  // Remove this if and return profileNameMatchedBeneficiary
   if (!_.isEmpty(profileNameMatchedBeneficiary)) {
     return profileNameMatchedBeneficiary;
   }
