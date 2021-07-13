@@ -25,6 +25,11 @@ const filterBeneficiary = (state, beneficiaryList) => {
     return idMatchRecord;
   }
 
+  const similarBeneficiaries = getStringSimilarityBasedBeneficiary(beneficiaryList, state.name);
+  if(!_.isEmpty(similarBeneficiaries)) {
+    return similarBeneficiaries;
+  }
+
   const verifiedNameMatchedBeneficiary = _.find(beneficiaryList, (entry) => {
     const { name } = entry;
     const firstName = getFirstName(name);
@@ -44,7 +49,7 @@ const filterBeneficiary = (state, beneficiaryList) => {
     return profileNameMatchedBeneficiary;
   }
 
-  return getStringSimilarityBasedBeneficiary(beneficiaryList, state.name);
+  return undefined;
 };
 
 const getBeneficiaryDetailsEntity = (beneficiaryList) => {
