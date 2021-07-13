@@ -11,6 +11,7 @@ export const makePostCall = async (path, body, stateCallback, token) => {
     })
   })
   .then((response) => {
+    if(response.status === 204) return {};
     return response.json();
   })
   .then((data) => {
@@ -24,31 +25,6 @@ export const makePostCall = async (path, body, stateCallback, token) => {
     stateCallback({ errorObj: {code: data.errorCode, message: data.error }, isLoading: false });
     throw data;
   });
-};
-
-export const makeStatelessPostCall = async (path, body, stateCallback, token) => {
-  stateCallback({ isLoading: true });
-  return Promise.resolve()
-    .then(() => {
-      return fetch(path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(body)
-      })
-    })
-    .then((response) => {
-      stateCallback({ isLoading: false });
-      const statusCode = response.status;
-      if(statusCode != HTTP_NO_CONTENT) {
-        throw response;
-      }
-      return statusCode;
-    })
-    .catch(data => {
-      stateCallback({ errorObj: {code: data.errorCode, message: data.error }, isLoading: false });
-      throw data;
-    });
 };
 
 export const makeGetCall = async (path, stateCallback, token) => {
