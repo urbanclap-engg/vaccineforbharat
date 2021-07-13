@@ -8,7 +8,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { makePostCall, makeStatelessPostCall } from './utils/network';
+import { makePostCall } from './utils/network';
 import { fetchBenficiaries } from './booking/beneficiary';
 import { fetchSlots } from './booking/slot';
 import { getSearchParamsFromUrl } from './utils/queryParams';
@@ -100,7 +100,7 @@ function App(props) {
   const rescheduleSlot = async (appointmentId) => {
     try {
       // API returns 204 on success.
-      await makeStatelessPostCall(API_URLS.RESCHEDULE, {
+      await makePostCall(API_URLS.RESCHEDULE, {
         "appointment_id": appointmentId,
         "session_id": state.vaccineSlot.session_id,
         "slot": state.vaccineSlot.slot_time

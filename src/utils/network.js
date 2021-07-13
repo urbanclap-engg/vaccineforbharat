@@ -1,4 +1,3 @@
-const HTTP_NO_CONTENT = 204;
 export const makePostCall = async (path, body, stateCallback, token) => {
   stateCallback({ isLoading: true });
   return Promise.resolve()
