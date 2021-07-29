@@ -124,7 +124,7 @@ function App(props) {
         "center_id": state.vaccineSlot.center_id,
         "slot": state.vaccineSlot.slot_time,
         "session_id": state.vaccineSlot.session_id,
-        "dose": _.isEmpty(state.beneficiaryDetails.dose1_date)?1:2
+        "dose": state.doseToBook
       }, stateCallback, state.token);
       const appointmentId = _.get(data, 'appointment_confirmation_no');
       if (!_.isEmpty(appointmentId)) {

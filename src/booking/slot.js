@@ -1,7 +1,15 @@
 import * as _ from 'lodash';
-import { makeGetCall, makePostCall } from '../utils/network';
+import { makeGetCall } from '../utils/network';
 import { getCurrentDateString, getSlotDateString } from '../utils/stringUtils';
-import { PROCESS_STAGE, API_URLS, SLOT_FILTER, ERROR_CODE, FREE_SLOT_THRESHOLD, VACCINE_TYPE } from '../constants';
+import {
+  PROCESS_STAGE,
+  API_URLS,
+  SLOT_FILTER,
+  ERROR_CODE,
+  FREE_SLOT_THRESHOLD,
+  VACCINE_TYPE,
+  DOSE_TYPE,
+} from "../constants";
 
 const getTargetSlotTime = (availableSession) => {
   const slotDate = availableSession.date;
@@ -13,31 +21,31 @@ const getTargetSlotTime = (availableSession) => {
   return _.last(availableSession.slots);
 };
 
-const getPrioritisedSlot = (availableSlots) => {
+const getPrioritisedSlot = (availableSlots, capacityForDose) => {
   const freeSlotsAboveThreshold = _.filter(availableSlots, (slots) => {
     return _.get(slots, 'fee_type') == VACCINE_TYPE.FREE
-      && _.get(slots, 'available_capacity_dose1') >= FREE_SLOT_THRESHOLD;
+      && _.get(slots, [capacityForDose]) >= FREE_SLOT_THRESHOLD;
   });
   if(!_.isEmpty(freeSlotsAboveThreshold)) {
-    return _.maxBy(freeSlotsAboveThreshold, 'available_capacity_dose1');
+    return _.maxBy(freeSlotsAboveThreshold, slot => slot[capacityForDose]);
   }
-  return _.maxBy(availableSlots, 'available_capacity_dose1');
+  return _.maxBy(availableSlots, slot => slot[capacityForDose]);
 };
 
-const getAvailableVaccineSlot = (state, centerList) => {
+const getAvailableVaccineSlot = (state, centerList, doseToBook) => {
   const lastAttemptedSession = _.get(state, 'vaccineSlot.session_id');
+  const capacityForDose = doseToBook === DOSE_TYPE.SECOND ? 'available_capacity_dose2': 'available_capacity_dose1';
   const availableSlots = [];
   _.forEach(centerList, (center) => {
     const { sessions } = center;
     const availableSessions = _.filter(sessions, (session) => {
-      // TODO: Update to param based dose check later
       const centerAvailability = _.get(session, 'available_capacity', 0);
-      const dose1Availability = _.get(session, 'available_capacity_dose1', 0);
-      return centerAvailability > 0 && dose1Availability >= SLOT_FILTER.MIN_CAPACITY &&
+      const doseAvailability = _.get(session, [capacityForDose], 0);
+      return centerAvailability > 0 && doseAvailability >= SLOT_FILTER.MIN_CAPACITY &&
         session.min_age_limit === SLOT_FILTER.MIN_AGE && session.session_id !== lastAttemptedSession;
     });
 
-    const maxAvailabilitySession = _.maxBy(availableSessions, 'available_capacity_dose1');
+    const maxAvailabilitySession = _.maxBy(availableSessions, session => session[capacityForDose]);
 
     if (maxAvailabilitySession) {
       const targetSlot = getTargetSlotTime(maxAvailabilitySession);
@@ -49,11 +57,11 @@ const getAvailableVaccineSlot = (state, centerList) => {
     }
   });
 
-  return getPrioritisedSlot(availableSlots);
+  return getPrioritisedSlot(availableSlots, capacityForDose);
 };
 
 export const fetchSlots = async(state, stateCallback) => {
-  const { district } = state;
+  const { district, doseToBook } = state;
   if (!district) {
     stateCallback({ stage: PROCESS_STAGE.REGISTERED });
     return;
@@ -63,7 +71,7 @@ export const fetchSlots = async(state, stateCallback) => {
     const data = await makeGetCall(`${API_URLS.FETCH_SLOTS}?district_id=${district}&date=${dateString}`,
      stateCallback, state.token);
     const centerList = _.get(data, 'centers', []);
-    const vaccineSlot = getAvailableVaccineSlot(state, centerList);
+    const vaccineSlot = getAvailableVaccineSlot(state, centerList, doseToBook);
     if (_.isEmpty(vaccineSlot)) {
       stateCallback({errorObj: { code: ERROR_CODE.NO_SLOT, message: `No available slot found for district ${district}`} })
       return;

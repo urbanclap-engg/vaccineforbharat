@@ -41,6 +41,17 @@ export const SLOT_FILTER = {
   MIN_CAPACITY: 5
 };
 
+export const VACCINE_SECOND_DOSE_BUFFER_DAYS = {
+  'COVISHIELD': 84,
+  'COVAXIN': 28,
+  'SPUTNIK V': 21,
+};
+
+export const DOSE_TYPE = {
+  FIRST: 1,
+  SECOND: 2,
+};
+
 export const ERROR_CODE = {
   NO_BENEFICIARY: 'NO_BENEFICIARY',
   NO_SLOT: 'NO_SLOT',

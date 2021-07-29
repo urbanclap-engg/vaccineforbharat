@@ -3,7 +3,13 @@ import moment from 'moment';
 import { makeGetCall, makePostCall } from '../utils/network';
 import { getEditDistance, getFirstName, getCurrentDateString,
   getStringSimilarityBasedBeneficiary } from '../utils/stringUtils';
-import { PROCESS_STAGE, API_URLS, ALLOWED_NAME_EDITS, ERROR_CODE, ID_TYPE } from '../constants';
+import {
+  PROCESS_STAGE,
+  API_URLS,
+  ALLOWED_NAME_EDITS,
+  ID_TYPE,
+  VACCINE_SECOND_DOSE_BUFFER_DAYS
+} from '../constants';
 
 const filterBeneficiary = (state, beneficiaryList) => {
   const paramsName = getFirstName(state.name);
@@ -69,6 +75,16 @@ const checkIfAppointmentExpired = (appointmentId, slotDate) => {
   && moment.utc().diff(moment.utc(slotDate, 'DD-MM-YYYY'), 'days') >= 2;
 };
 
+const checkIfEligibleForDose2 = beneficiaryDetails => {
+  const dose1Date = _.get(beneficiaryDetails, "dose1_date", "");
+  const vaccine = _.get(beneficiaryDetails, "vaccine", "");
+  return (
+    !_.isEmpty(dose1Date) &&
+    moment.utc().diff(moment.utc(dose1Date, "DD-MM-YYYY"), "days") >=
+      VACCINE_SECOND_DOSE_BUFFER_DAYS[vaccine]
+  );
+};
+
 export const fetchBenficiaries = async (state, stateCallback) => {
   try {
     const data = await makeGetCall(API_URLS.FETCH_BENEFICIARY, stateCallback, state.token);
@@ -81,25 +97,31 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       });
       return;
     }
-    // TODO: Need to be changed later for dose 2 
-    if (!_.isEmpty(beneficiaryDetails.dose1_date) || !_.isEmpty(beneficiaryDetails.dose2_date)) {
-      stateCallback({stage: PROCESS_STAGE.VACCINATED, beneficiaryDetails });
+    // Go to vaccinated stage -
+    // 1. If Dose 2 date is present.
+    // 2. If Dose 2 date is not present, but beneficiary is still not eligible for dose 2.
+    const isUserEligibleForDose2 = checkIfEligibleForDose2(beneficiaryDetails);
+    if (!_.isEmpty(beneficiaryDetails.dose1_date) &&
+      (!_.isEmpty(beneficiaryDetails.dose2_date) ||
+        !isUserEligibleForDose2)) {
+      stateCallback({ stage: PROCESS_STAGE.VACCINATED, beneficiaryDetails });
       return;
     }
     if (!_.isEmpty(beneficiaryDetails.appointments)) {
       // Check if a reschedule is needed - if appointment is more than a day old.
       const latestAppointment = _.maxBy(beneficiaryDetails.appointments, 'date');
+      const doseToBook = _.get(latestAppointment, 'dose');
       const appointmentId = _.get(latestAppointment, 'appointment_id', '');
       const slotDate = _.get(latestAppointment, 'date', '');
 
       if(checkIfAppointmentExpired(appointmentId, slotDate)) {
-        stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, appointmentId});
+        stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, appointmentId, doseToBook});
         return;
       }
       stateCallback({stage: PROCESS_STAGE.EXISTING_BOOKING, beneficiaryDetails });
       return;
     }
-    stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails });
+    stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, doseToBook: isUserEligibleForDose2 ? 2 : 1 });
   } catch(err) {
 
   }
