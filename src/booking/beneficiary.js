@@ -97,6 +97,11 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       });
       return;
     }
+    // Comment
+    // If dose_2 date not empty return vaccinated
+    // If !isUserEligibleForDose2 and dose 1 date non empty return vaccinated
+    // Determine doseToBook at this level. If isUserEligibleForDose2 then DOSE_TYPE.SECOND else DOSE_TYPE.FIRST
+
     // Go to vaccinated stage -
     // 1. If Dose 2 date is present.
     // 2. If Dose 2 date is not present, but beneficiary is still not eligible for dose 2.
@@ -121,6 +126,8 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       stateCallback({stage: PROCESS_STAGE.EXISTING_BOOKING, beneficiaryDetails });
       return;
     }
+    // Comment
+    // Use doseToBook variable
     stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, doseToBook: isUserEligibleForDose2 ? 2 : 1 });
   } catch(err) {
 
