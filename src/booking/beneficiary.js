@@ -8,7 +8,8 @@ import {
   API_URLS,
   ALLOWED_NAME_EDITS,
   ID_TYPE,
-  VACCINE_SECOND_DOSE_BUFFER_DAYS
+  VACCINE_SECOND_DOSE_BUFFER_DAYS,
+  DOSE_TYPE,
 } from '../constants';
 
 const filterBeneficiary = (state, beneficiaryList) => {
@@ -97,25 +98,22 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       });
       return;
     }
-    // Comment
-    // If dose_2 date not empty return vaccinated
-    // If !isUserEligibleForDose2 and dose 1 date non empty return vaccinated
-    // Determine doseToBook at this level. If isUserEligibleForDose2 then DOSE_TYPE.SECOND else DOSE_TYPE.FIRST
-
     // Go to vaccinated stage -
     // 1. If Dose 2 date is present.
     // 2. If Dose 2 date is not present, but beneficiary is still not eligible for dose 2.
+    if(!_.isEmpty(beneficiaryDetails.dose2_date)) {
+      stateCallback({ stage: PROCESS_STAGE.VACCINATED, beneficiaryDetails });
+      return;
+    }
     const isUserEligibleForDose2 = checkIfEligibleForDose2(beneficiaryDetails);
-    if (!_.isEmpty(beneficiaryDetails.dose1_date) &&
-      (!_.isEmpty(beneficiaryDetails.dose2_date) ||
-        !isUserEligibleForDose2)) {
+    const doseToBook = isUserEligibleForDose2 ? DOSE_TYPE.SECOND: DOSE_TYPE.FIRST;
+    if (!isUserEligibleForDose2 && !_.isEmpty(beneficiaryDetails.dose1_date)) {
       stateCallback({ stage: PROCESS_STAGE.VACCINATED, beneficiaryDetails });
       return;
     }
     if (!_.isEmpty(beneficiaryDetails.appointments)) {
       // Check if a reschedule is needed - if appointment is more than a day old.
       const latestAppointment = _.maxBy(beneficiaryDetails.appointments, 'date');
-      const doseToBook = _.get(latestAppointment, 'dose');
       const appointmentId = _.get(latestAppointment, 'appointment_id', '');
       const slotDate = _.get(latestAppointment, 'date', '');
 
@@ -126,9 +124,7 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       stateCallback({stage: PROCESS_STAGE.EXISTING_BOOKING, beneficiaryDetails });
       return;
     }
-    // Comment
-    // Use doseToBook variable
-    stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, doseToBook: isUserEligibleForDose2 ? 2 : 1 });
+    stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, doseToBook });
   } catch(err) {
 
   }
