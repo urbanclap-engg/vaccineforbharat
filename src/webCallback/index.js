@@ -64,8 +64,7 @@ const getCallbackParams = (state) => {
         date: vaccineSlot.date,
         vaccine_fee: vaccineFee,
         vaccine: vaccineSlot.vaccine,
-        // TODO dose 2 handling
-        dose: 1
+        dose: state.doseToBook,
       };
     default:
       return baseState;
