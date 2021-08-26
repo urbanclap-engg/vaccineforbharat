@@ -82,7 +82,7 @@ export const VACCINE_TYPE = {
   PAID: 'Paid'
 }
 
-export const FREE_SLOT_THRESHOLD = 30;
+export const FREE_SLOT_THRESHOLD = 15;
 
 export const SLOT_CUTOFF_HOUR = 15;
 
