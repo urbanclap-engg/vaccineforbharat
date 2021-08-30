@@ -111,6 +111,8 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       stateCallback({ stage: PROCESS_STAGE.VACCINATED, beneficiaryDetails });
       return;
     }
+
+    const firstDoseVaccine = _.get(beneficiaryDetails, 'vaccine', '');
     if (!_.isEmpty(beneficiaryDetails.appointments)) {
       // Check if a reschedule is needed - if appointment is more than a day old.
       const latestAppointment = _.maxBy(beneficiaryDetails.appointments, 'date');
@@ -118,13 +120,13 @@ export const fetchBenficiaries = async (state, stateCallback) => {
       const slotDate = _.get(latestAppointment, 'date', '');
 
       if(checkIfAppointmentExpired(appointmentId, slotDate)) {
-        stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, appointmentId, doseToBook});
+        stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, appointmentId, doseToBook, firstDoseVaccine });
         return;
       }
       stateCallback({stage: PROCESS_STAGE.EXISTING_BOOKING, beneficiaryDetails });
       return;
     }
-    stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, doseToBook });
+    stateCallback({stage: PROCESS_STAGE.FETCH_SLOTS, beneficiaryDetails, doseToBook, firstDoseVaccine });
   } catch(err) {
 
   }
