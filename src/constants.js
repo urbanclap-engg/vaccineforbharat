@@ -82,7 +82,7 @@ export const VACCINE_TYPE = {
   PAID: 'Paid'
 }
 
-export const FREE_SLOT_THRESHOLD = 15;
+export const FREE_SLOT_THRESHOLD = 5;
 export const VACCINE_FEE_THRESHOLD = 1000;
 export const DEFAULT_VACCINE_FOR_FIRST_DOSE = 'COVISHIELD';
 
